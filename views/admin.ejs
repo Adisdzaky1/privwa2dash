@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="/dashboard" class="flex items-center">
+                        <i class="fas fa-comments text-purple-600 text-2xl mr-2"></i>
+                        <span class="text-2xl font-bold text-gray-900">WhatsGate</span>
+                    </a>
+                    <span class="ml-4 px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">ADMIN</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/dashboard" class="text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                    </a>
+                    <button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-8">User Management</h1>
+
+            <!-- Users Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">User</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Email</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Plan</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Daily Limit</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Used Today</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Requests</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Plan Expires</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                            <tr class="border-t hover:bg-gray-50">
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold mr-2">
+                                            <%= user.username.charAt(0).toUpperCase() %>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900"><%= user.username %></p>
+                                            <% if (user.role === 'admin') { %>
+                                            <span class="text-xs text-red-600 font-semibold">ADMIN</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-600"><%= user.email %></td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 bg-<%= user.plan === 'free' ? 'gray' : user.plan === 'pro' ? 'purple' : 'blue' %>-100 text-<%= user.plan === 'free' ? 'gray' : user.plan === 'pro' ? 'purple' : 'blue' %>-800 rounded text-xs font-semibold uppercase">
+                                        <%= user.plan %>
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-900 font-semibold"><%= user.daily_limit %></td>
+                                <td class="py-3 px-4 text-sm text-gray-600"><%= user.requests_used_today %></td>
+                                <td class="py-3 px-4 text-sm text-gray-900 font-semibold"><%= user.total_requests.toLocaleString() %></td>
+                                <td class="py-3 px-4 text-sm text-gray-600">
+                                    <% if (user.plan_expires_at) { %>
+                                        <%= new Date(user.plan_expires_at).toLocaleDateString() %>
+                                    <% } else { %>
+                                        <span class="text-gray-400">-</span>
+                                    <% } %>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="openEditModal('<%= user.id %>', '<%= user.username %>', '<%= user.plan %>', <%= user.daily_limit %>, '<%= user.plan_expires_at || '' %>')" 
+                                                class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition">
+                                            <i class="fas fa-edit mr-1"></i>Edit
+                                        </button>
+                                        <% if (user.role !== 'admin') { %>
+                                        <button onclick="deleteUser('<%= user.id %>', '<%= user.username %>')" 
+                                                class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition">
+                                            <i class="fas fa-trash mr-1"></i>Delete
+                                        </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Plan Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-900">Edit User Plan</h2>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="editPlanForm" class="space-y-4">
+                <input type="hidden" id="editUserId" name="userId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="editUsername" readonly 
+                           class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+                    <select id="editPlan" name="plan" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                        <option value="free">Free</option>
+                        <option value="pro">Pro</option>
+                        <option value="enterprise">Enterprise</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Daily Request Limit</label>
+                    <input type="number" id="editDailyLimit" name="dailyLimit" min="1" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan Duration (Days)</label>
+                    <input type="number" id="editPlanDays" name="planDays" min="0" placeholder="0 = No expiration"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Leave 0 or empty for no expiration</p>
+                </div>
+
+                <!-- Error Message -->
+                <div id="editError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="editErrorText"></span>
+                </div>
+
+                <!-- Success Message -->
+                <div id="editSuccess" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span id="editSuccessText"></span>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button type="submit" id="saveBtn"
+                            class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        <span id="saveBtnText">Save Changes</span>
+                        <i id="saveBtnSpinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                    </button>
+                    <button type="button" onclick="closeEditModal()"
+                            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal(userId, username, plan, dailyLimit, expiresAt) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editPlan').value = plan;
+            document.getElementById('editDailyLimit').value = dailyLimit;
+            
+            // Calculate days remaining if plan expires
+            if (expiresAt) {
+                const now = new Date();
+                const expires = new Date(expiresAt);
+                const diffDays = Math.ceil((expires - now) / (1000 * 60 * 60 * 24));
+                document.getElementById('editPlanDays').value = diffDays > 0 ? diffDays : 0;
+            } else {
+                document.getElementById('editPlanDays').value = 0;
+            }
+            
+            document.getElementById('editModal').classList.remove('hidden');
+            hideEditMessages();
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editPlanForm').reset();
+            hideEditMessages();
+        }
+
+        function showEditError(message) {
+            document.getElementById('editErrorText').textContent = message;
+            document.getElementById('editError').classList.remove('hidden');
+            document.getElementById('editSuccess').classList.add('hidden');
+        }
+
+        function showEditSuccess(message) {
+            document.getElementById('editSuccessText').textContent = message;
+            document.getElementById('editSuccess').classList.remove('hidden');
+            document.getElementById('editError').classList.add('hidden');
+        }
+
+        function hideEditMessages() {
+            document.getElementById('editError').classList.add('hidden');
+            document.getElementById('editSuccess').classList.add('hidden');
+        }
+
+        function setEditLoading(isLoading) {
+            const saveBtn = document.getElementById('saveBtn');
+            const saveBtnText = document.getElementById('saveBtnText');
+            const saveBtnSpinner = document.getElementById('saveBtnSpinner');
+            
+            if (isLoading) {
+                saveBtn.disabled = true;
+                saveBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                saveBtnText.textContent = 'Saving...';
+                saveBtnSpinner.classList.remove('hidden');
+            } else {
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                saveBtnText.textContent = 'Save Changes';
+                saveBtnSpinner.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('editPlanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideEditMessages();
+            setEditLoading(true);
+
+            const formData = new FormData(e.target);
+            const data = {
+                userId: formData.get('userId'),
+                plan: formData.get('plan'),
+                dailyLimit: formData.get('dailyLimit'),
+                planDays: formData.get('planDays') || 0
+            };
+
+            try {
+                const response = await fetch('/admin/update-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showEditSuccess(result.message);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showEditError(result.error || 'Failed to update plan');
+                }
+            } catch (error) {
+                showEditError('An error occurred. Please try again.');
+            } finally {
+                setEditLoading(false);
+            }
+        });
+
+        async function deleteUser(userId, username) {
+            if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/user/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Failed to delete user');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

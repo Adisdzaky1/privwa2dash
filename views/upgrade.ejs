@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Plan - WhatsGate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#25D366',
+                        secondary: '#128C7E',
+                        dark: '#075E54',
+                        light: '#DCF8C6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fab fa-whatsapp text-3xl text-primary mr-2"></i>
+                        <span class="text-2xl font-bold text-gray-900">WhatsGate</span>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Upgrade Plan</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/dashboard" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+                    </a>
+                    <a href="https://t.me/Oficiallz" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600">
+                        <i class="fab fa-telegram mr-1"></i> Support
+                    </a>
+                    <% if (user) { %>
+                        <div class="relative group">
+                            <button class="flex items-center text-gray-700 hover:text-primary focus:outline-none">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                                <span class="ml-2"><%= user.email %></span>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Upgrade Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Current Plan Info -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Current Plan</h2>
+                    <p class="text-gray-600 mt-1">Your current subscription details</p>
+                </div>
+                <div class="text-right">
+                    <span class="px-4 py-2 bg-primary text-white rounded-lg text-lg font-semibold capitalize">
+                        <%= user.plan || 'free' %> Plan
+                    </span>
+                    <% if (user.plan === 'free') { %>
+                        <p class="text-sm text-gray-500 mt-1">6 requests per day</p>
+                    <% } else if (user.plan === 'starter') { %>
+                        <p class="text-sm text-gray-500 mt-1">100 requests per day</p>
+                    <% } else if (user.plan === 'pro') { %>
+                        <p class="text-sm text-gray-500 mt-1">500 requests per day</p>
+                    <% } else if (user.plan === 'enterprise') { %>
+                        <p class="text-sm text-gray-500 mt-1">2000+ requests per day</p>
+                    <% } %>
+                </div>
+            </div>
+            
+            <% if (user.plan !== 'free') { %>
+                <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-check text-green-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Active Subscription</h3>
+                            <div class="mt-1 text-sm text-green-700">
+                                <p>Your plan is active and will automatically renew.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-rocket text-blue-600"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Ready to Upgrade?</h3>
+                            <div class="mt-1 text-sm text-blue-700">
+                                <p>Upgrade your plan to get more API requests and premium features.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Pricing Plans -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900">Choose Your Plan</h2>
+            <p class="mt-4 text-xl text-gray-600">Select the perfect plan for your needs</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Free Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden <%= user.plan === 'free' ? 'ring-2 ring-primary' : '' %>">
+                <div class="px-6 py-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-rocket text-3xl text-primary mr-3"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Free</h3>
+                        <% if (user.plan === 'free') { %>
+                            <span class="ml-auto bg-primary text-white text-xs font-semibold rounded-full px-3 py-1">CURRENT</span>
+                        <% } %>
+                    </div>
+                    <div class="mt-4 flex items-baseline text-6xl font-extrabold">
+                        $0<span class="ml-1 text-2xl font-medium text-gray-500">/month</span>
+                    </div>
+                    <p class="mt-5 text-lg text-gray-500">Perfect for testing and small projects</p>
+                </div>
+                <div class="px-6 pt-6 pb-8 bg-gray-50">
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">6 requests per day</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Basic API access</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Reset daily at 6 AM</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Community support</p>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <% if (user.plan === 'free') { %>
+                            <button class="w-full bg-gray-300 text-gray-700 px-3 py-4 rounded-md text-lg font-medium cursor-not-allowed">
+                                Current Plan
+                            </button>
+                        <% } else { %>
+                            <button onclick="downgradeToFree()" class="w-full bg-gray-100 text-gray-700 px-3 py-4 rounded-md text-lg font-medium hover:bg-gray-200">
+                                Downgrade to Free
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Starter Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden transform scale-105 <%= user.plan === 'starter' ? 'ring-2 ring-secondary' : '' %>">
+                <div class="px-6 py-8 bg-secondary">
+                    <div class="flex items-center">
+                        <i class="fas fa-star text-3xl text-white mr-3"></i>
+                        <h3 class="text-2xl font-bold text-white">Starter</h3>
+                        <% if (user.plan === 'starter') { %>
+                            <span class="ml-auto bg-white text-secondary text-xs font-semibold rounded-full px-3 py-1">CURRENT</span>
+                        <% } else { %>
+                            <span class="ml-auto bg-white text-secondary text-xs font-semibold rounded-full px-3 py-1">POPULAR</span>
+                        <% } %>
+                    </div>
+                    <div class="mt-4 flex items-baseline text-6xl font-extrabold text-white">
+                        Rp 50k<span class="ml-1 text-2xl font-medium text-gray-200">/month</span>
+                    </div>
+                    <p class="mt-5 text-lg text-gray-200">Great for growing businesses</p>
+                </div>
+                <div class="px-6 pt-6 pb-8 bg-gray-50">
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">100 requests per day</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Full API access</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">30-day validity</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Email support</p>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <% if (user.plan === 'starter') { %>
+                            <button class="w-full bg-gray-300 text-gray-700 px-3 py-4 rounded-md text-lg font-medium cursor-not-allowed">
+                                Current Plan
+                            </button>
+                        <% } else { %>
+                            <button onclick="purchasePlan('starter')" class="w-full bg-secondary text-white px-3 py-4 rounded-md text-lg font-medium hover:bg-dark">
+                                <i class="fas fa-shopping-cart mr-2"></i> Purchase Now
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden <%= user.plan === 'pro' ? 'ring-2 ring-yellow-500' : '' %>">
+                <div class="px-6 py-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-crown text-3xl text-yellow-500 mr-3"></i>
+                        <h3 class="text-2xl font-bold text-gray-900">Pro</h3>
+                        <% if (user.plan === 'pro') { %>
+                            <span class="ml-auto bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full px-3 py-1">CURRENT</span>
+                        <% } %>
+                    </div>
+                    <div class="mt-4 flex items-baseline text-6xl font-extrabold">
+                        Rp 150k<span class="ml-1 text-2xl font-medium text-gray-500">/month</span>
+                    </div>
+                    <p class="mt-5 text-lg text-gray-500">For professional applications</p>
+                </div>
+                <div class="px-6 pt-6 pb-8 bg-gray-50">
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">500 requests per day</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Priority support</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Custom endpoints</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Advanced analytics</p>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <% if (user.plan === 'pro') { %>
+                            <button class="w-full bg-gray-300 text-gray-700 px-3 py-4 rounded-md text-lg font-medium cursor-not-allowed">
+                                Current Plan
+                            </button>
+                        <% } else { %>
+                            <button onclick="purchasePlan('pro')" class="w-full bg-primary text-white px-3 py-4 rounded-md text-lg font-medium hover:bg-secondary">
+                                <i class="fas fa-shopping-cart mr-2"></i> Purchase Now
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden <%= user.plan === 'enterprise' ? 'ring-2 ring-dark' : '' %>">
+                <div class="px-6 py-8 bg-dark">
+                    <div class="flex items-center">
+                        <i class="fas fa-building text-3xl text-white mr-3"></i>
+                        <h3 class="text-2xl font-bold text-white">Enterprise</h3>
+                        <% if (user.plan === 'enterprise') { %>
+                            <span class="ml-auto bg-white text-dark text-xs font-semibold rounded-full px-3 py-1">CURRENT</span>
+                        <% } %>
+                    </div>
+                    <div class="mt-4 flex items-baseline text-6xl font-extrabold text-white">
+                        Rp 500k<span class="ml-1 text-2xl font-medium text-gray-200">/month</span>
+                    </div>
+                    <p class="mt-5 text-lg text-gray-200">For large scale operations</p>
+                </div>
+                <div class="px-6 pt-6 pb-8 bg-gray-50">
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">2000+ requests per day</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Dedicated support</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">Custom integration</p>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check text-primary"></i>
+                            </div>
+                            <p class="ml-3 text-base text-gray-700">SLA guarantee</p>
+                        </li>
+                    </ul>
+                    <div class="mt-6">
+                        <% if (user.plan === 'enterprise') { %>
+                            <button class="w-full bg-gray-300 text-gray-700 px-3 py-4 rounded-md text-lg font-medium cursor-not-allowed">
+                                Current Plan
+                            </button>
+                        <% } else { %>
+                            <button onclick="purchasePlan('enterprise')" class="w-full bg-dark text-white px-3 py-4 rounded-md text-lg font-medium hover:bg-gray-800">
+                                <i class="fas fa-shopping-cart mr-2"></i> Purchase Now
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Plan -->
+        <div class="mt-12 bg-white rounded-lg shadow p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Need a Custom Plan?</h2>
+                <p class="mt-4 text-xl text-gray-600">Contact us for custom pricing and features</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-r from-primary to-secondary rounded-lg p-6 text-white">
+                    <h3 class="text-2xl font-bold mb-4">Custom Enterprise Solution</h3>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center">
+                            <i class="fas fa-check mr-3"></i>
+                            <span>Custom daily request limit</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check mr-3"></i>
+                            <span>Priority 24/7 support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check mr-3"></i>
+                            <span>Dedicated account manager</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check mr-3"></i>
+                            <span>Custom integration assistance</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check mr-3"></i>
+                            <span>Bulk pricing discounts</span>
+                        </li>
+                    </ul>
+                    <button onclick="contactForCustom()" class="w-full bg-white text-dark font-semibold py-3 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-envelope mr-2"></i> Contact for Custom Plan
+                    </button>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">How to Purchase</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <span class="font-bold">1</span>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="font-medium text-gray-900">Choose Your Plan</h4>
+                                <p class="text-sm text-gray-600 mt-1">Select the plan that best fits your needs</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <span class="font-bold">2</span>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="font-medium text-gray-900">Contact via Telegram</h4>
+                                <p class="text-sm text-gray-600 mt-1">Send a message to @Oficiallz with your plan choice</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <span class="font-bold">3</span>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="font-medium text-gray-900">Make Payment</h4>
+                                <p class="text-sm text-gray-600 mt-1">Complete payment via available methods</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center">
+                                <span class="font-bold">4</span>
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="font-medium text-gray-900">Activate Plan</h4>
+                                <p class="text-sm text-gray-600 mt-1">Your plan will be activated within 24 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="mt-12 bg-white rounded-lg shadow p-8">
+            <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">Frequently Asked Questions</h2>
+            
+            <div class="space-y-6">
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">How does billing work?</h3>
+                    <p class="text-gray-600">All plans are billed monthly. You can upgrade, downgrade, or cancel anytime. No long-term contracts.</p>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">What happens if I exceed my daily limit?</h3>
+                    <p class="text-gray-600">If you exceed your daily request limit, API calls will return a 429 error until the reset at 6 AM the next day.</p>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Can I switch plans?</h3>
+                    <p class="text-gray-600">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Is there a refund policy?</h3>
+                    <p class="text-gray-600">We offer a 7-day money-back guarantee for all paid plans. Contact support for refund requests.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Support -->
+        <div class="mt-8 text-center">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-8">
+                <i class="fas fa-headset text-5xl text-blue-500 mb-4"></i>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">Need Help Choosing?</h3>
+                <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+                    Our support team is here to help you choose the right plan for your needs. 
+                    Contact us via Telegram for personalized assistance.
+                </p>
+                <a href="https://t.me/Oficiallz" target="_blank" 
+                   class="inline-flex items-center bg-blue-500 text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-blue-600">
+                    <i class="fab fa-telegram mr-2"></i> Contact Support on Telegram
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fab fa-whatsapp text-2xl text-primary mr-2"></i>
+                    <span class="text-xl font-bold text-white">WhatsGate</span>
+                </div>
+                <div class="text-gray-400 text-sm">
+                    <p>© 2024 WhatsGate - Simple WhatsApp API. All rights reserved.</p>
+                    <p class="mt-1">Upgrade your plan anytime • All prices in Indonesian Rupiah (IDR)</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Purchase plan function
+        function purchasePlan(planName) {
+            const planInfo = {
+                'starter': {
+                    name: 'Starter Plan',
+                    price: 'Rp 50,000',
+                    requests: '100 requests per day',
+                    validity: '30 days'
+                },
+                'pro': {
+                    name: 'Pro Plan',
+                    price: 'Rp 150,000',
+                    requests: '500 requests per day',
+                    validity: '30 days'
+                },
+                'enterprise': {
+                    name: 'Enterprise Plan',
+                    price: 'Rp 500,000',
+                    requests: '2000+ requests per day',
+                    validity: '30 days'
+                }
+            };
+            
+            const plan = planInfo[planName];
+            if (!plan) return;
+            
+            const message = `Hi, I'd like to purchase the ${plan.name} for WhatsGate API.\n\n` +
+                          `Plan Details:\n` +
+                          `• Price: ${plan.price}/month\n` +
+                          `• Requests: ${plan.requests}\n` +
+                          `• Validity: ${plan.validity}\n\n` +
+                          `My Account Email: <%= user.email %>\n` +
+                          `Please let me know the payment details.`;
+            
+            const telegramUrl = `https://t.me/Oficiallz?text=${encodeURIComponent(message)}`;
+            
+            if (confirm(`You will be redirected to Telegram to purchase the ${plan.name}. Continue?`)) {
+                window.open(telegramUrl, '_blank');
+            }
+        }
+        
+        // Contact for custom plan
+        function contactForCustom() {
+            const message = `Hi, I'm interested in a custom plan for WhatsGate API.\n\n` +
+                          `My Account Email: <%= user.email %>\n` +
+                          `Current Plan: <%= user.plan || 'free' %>\n` +
+                          `Please contact me to discuss custom requirements and pricing.`;
+            
+            const telegramUrl = `https://t.me/Oficiallz?text=${encodeURIComponent(message)}`;
+            window.open(telegramUrl, '_blank');
+        }
+        
+        // Downgrade to free (admin only)
+        function downgradeToFree() {
+            if (!confirm('Are you sure you want to downgrade to the Free plan?')) {
+                return;
+            }
+            
+            // This would typically be an API call to admin endpoint
+            alert('To downgrade your plan, please contact support via Telegram.');
+            
+            const message = `Hi, I'd like to downgrade my WhatsGate API plan to Free.\n\n` +
+                          `My Account Email: <%= user.email %>\n` +
+                          `Current Plan: <%= user.plan || 'free' %>\n` +
+                          `Please proceed with the downgrade.`;
+            
+            const telegramUrl = `https://t.me/Oficiallz?text=${encodeURIComponent(message)}`;
+            window.open(telegramUrl, '_blank');
+        }
+        
+        // Highlight current plan
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPlan = '<%= user.plan || "free" %>';
+            const planCards = document.querySelectorAll('[class*="ring-"]');
+            
+            planCards.forEach(card => {
+                const planType = card.classList.contains('ring-primary') ? 'free' :
+                                card.classList.contains('ring-secondary') ? 'starter' :
+                                card.classList.contains('ring-yellow-500') ? 'pro' :
+                                card.classList.contains('ring-dark') ? 'enterprise' : null;
+                
+                if (planType === currentPlan) {
+                    card.classList.add('shadow-xl');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

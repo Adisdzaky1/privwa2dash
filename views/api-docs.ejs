@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - WhatsGate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#25D366',
+                        secondary: '#128C7E',
+                        dark: '#075E54',
+                        light: '#DCF8C6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .method-get { border-left-color: #10B981; }
+        .method-post { border-left-color: #3B82F6; }
+        .method-delete { border-left-color: #EF4444; }
+        pre { border-radius: 0.5rem; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-tab.active { 
+            background-color: #25D366; 
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fab fa-whatsapp text-3xl text-primary mr-2"></i>
+                        <span class="text-2xl font-bold text-gray-900">WhatsGate</span>
+                        <span class="ml-2 text-sm font-medium text-gray-500">API Documentation</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/dashboard" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+                    </a>
+                    <a href="https://t.me/Oficiallz" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600">
+                        <i class="fab fa-telegram mr-1"></i> Support
+                    </a>
+                    <% if (user) { %>
+                        <div class="relative group">
+                            <button class="flex items-center text-gray-700 hover:text-primary focus:outline-none">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                                <span class="ml-2"><%= user.email %></span>
+                            </button>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- API Documentation Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar Navigation -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow p-6 sticky top-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">API Endpoints</h3>
+                    <nav class="space-y-2">
+                        <button onclick="showTab('authentication')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 nav-tab active">
+                            <i class="fas fa-key mr-2"></i> Authentication
+                        </button>
+                        <button onclick="showTab('send-message')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 nav-tab">
+                            <i class="fas fa-paper-plane mr-2"></i> Send Message
+                        </button>
+                        <button onclick="showTab('get-qrcode')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 nav-tab">
+                            <i class="fas fa-qrcode mr-2"></i> Get QR Code
+                        </button>
+                        <button onclick="showTab('session-management')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 nav-tab">
+                            <i class="fas fa-list mr-2"></i> Session Management
+                        </button>
+                        <button onclick="showTab('statistics')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 nav-tab">
+                            <i class="fas fa-chart-bar mr-2"></i> Statistics
+                        </button>
+                        <button onclick="showTab('error-codes')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 nav-tab">
+                            <i class="fas fa-exclamation-circle mr-2"></i> Error Codes
+                        </button>
+                    </nav>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h4 class="text-sm font-semibold text-gray-900 mb-3">Quick Links</h4>
+                        <div class="space-y-2">
+                            <a href="/dashboard" class="flex items-center text-sm text-gray-600 hover:text-primary">
+                                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                            </a>
+                            <a href="/upgrade" class="flex items-center text-sm text-gray-600 hover:text-primary">
+                                <i class="fas fa-rocket mr-2"></i> Upgrade Plan
+                            </a>
+                            <a href="https://t.me/Oficiallz" target="_blank" class="flex items-center text-sm text-gray-600 hover:text-primary">
+                                <i class="fab fa-telegram mr-2"></i> Telegram Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-3">
+                <!-- Authentication Tab -->
+                <div id="authentication" class="tab-content active">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Authentication</h2>
+                        <p class="text-gray-600 mb-6">
+                            All API requests require authentication using your API key. You can find your API key in the dashboard.
+                        </p>
+                        
+                        <div class="bg-gray-50 border-l-4 border-primary p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle text-primary"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-gray-700">
+                                        <strong>Important:</strong> Keep your API key secure. Do not share it publicly or commit it to version control.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Using API Key</h3>
+                        <p class="text-gray-600 mb-4">
+                            Include your API key in the request headers or as a query parameter:
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">Header Method (Recommended)</h4>
+                                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-bash">curl -X GET \
+  '<%= baseUrl %>/api/send?message=Hello&nomor=6281234567890' \
+  -H 'X-API-Key: YOUR_API_KEY_HERE'</code></pre>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">Query Parameter Method</h4>
+                                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-bash">curl -X GET \
+  '<%= baseUrl %>/api/send?message=Hello&nomor=6281234567890&api_key=YOUR_API_KEY_HERE'</code></pre>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Generate API Key</h3>
+                        <p class="text-gray-600 mb-4">
+                            If you don't have an API key yet, generate one from your dashboard:
+                        </p>
+                        
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-key text-green-600"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-green-800">Get Your API Key</h4>
+                                    <div class="mt-2 text-sm text-green-700">
+                                        <p>1. Go to your <a href="/dashboard" class="font-medium underline">Dashboard</a></p>
+                                        <p>2. Find the API Key section</p>
+                                        <p>3. Click "Generate New Key"</p>
+                                        <p>4. Copy and save your API key securely</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Send Message Tab -->
+                <div id="send-message" class="tab-content">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Send Message</h2>
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full method-get">GET</span>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-http">GET <%= baseUrl %>/api/send?message={text}&nomor={phone_number}</code></pre>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Parameters</h3>
+                        <div class="overflow-x-auto mb-8">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameter</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">message</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Yes</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">String</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">The message text to send (max 1000 characters)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">nomor</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Yes</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">String</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                            WhatsApp number in format 628xxxxxxxxxx (Indonesia)<br>
+                                            <span class="text-xs text-gray-400">Example: 6281234567890</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Example Request</h3>
+                        <div class="mb-8">
+                            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-mono">curl</span>
+                                    <button onclick="copyCode('send-example')" class="text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded">
+                                        <i class="fas fa-copy mr-1"></i> Copy
+                                    </button>
+                                </div>
+                                <pre id="send-example"><code class="language-bash">curl -X GET \
+  '<%= baseUrl %>/api/send?message=Hello%20World&nomor=6281234567890' \
+  -H 'X-API-Key: YOUR_API_KEY_HERE'</code></pre>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Success Response</h3>
+                        <div class="mb-6">
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-json">{
+  "status": "success",
+  "message": "Pesan berhasil dikirim",
+  "data": {
+    "to": "6281234567890",
+    "message": "Hello World",
+    "message_id": "msg_1691234567890_abc123def",
+    "timestamp": "2024-01-01T12:00:00.000Z"
+  }
+}</code></pre>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Error Responses</h3>
+                        <div class="space-y-4">
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>400 Bad Request:</strong> Missing or invalid parameters
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>401 Unauthorized:</strong> Missing API key
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>403 Forbidden:</strong> Invalid API key
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-red-700">
+                                            <strong>429 Too Many Requests:</strong> Daily limit exceeded
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Get QR Code Tab -->
+                <div id="get-qrcode" class="tab-content">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Get QR Code</h2>
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full method-get">GET</span>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-http">GET <%= baseUrl %>/api/getcode?nomor={phone_number}</code></pre>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Parameters</h3>
+                        <div class="overflow-x-auto mb-8">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameter</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">nomor</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Yes</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">String</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                            WhatsApp number in format 628xxxxxxxxxx (Indonesia)<br>
+                                            <span class="text-xs text-gray-400">Example: 6281234567890</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Example Request</h3>
+                        <div class="mb-8">
+                            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-mono">curl</span>
+                                    <button onclick="copyCode('getcode-example')" class="text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded">
+                                        <i class="fas fa-copy mr-1"></i> Copy
+                                    </button>
+                                </div>
+                                <pre id="getcode-example"><code class="language-bash">curl -X GET \
+  '<%= baseUrl %>/api/getcode?nomor=6281234567890' \
+  -H 'X-API-Key: YOUR_API_KEY_HERE'</code></pre>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Success Response</h3>
+                        <div class="mb-6">
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-json">{
+  "status": "success",
+  "message": "QR code generated",
+  "data": {
+    "number": "6281234567890",
+    "qr_code": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCI+...",
+    "session_id": "session_1691234567890_abc123def",
+    "expires_at": "2024-01-01T12:05:00.000Z"
+  }
+}</code></pre>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">How to Use</h3>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-blue-900">QR Code Authentication Process</h4>
+                                    <ol class="mt-2 text-blue-800 list-decimal list-inside space-y-2">
+                                        <li>Call the API to generate a QR code for a phone number</li>
+                                        <li>Display the base64 QR code image in your application</li>
+                                        <li>Scan the QR code with WhatsApp on the target phone</li>
+                                        <li>The session will be active for 5 minutes</li>
+                                        <li>Once authenticated, you can send messages using the /api/send endpoint</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Management Tab -->
+                <div id="session-management" class="tab-content">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Session Management</h2>
+                        
+                        <!-- List Sessions -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900">List All Sessions</h3>
+                                <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full method-get">GET</span>
+                            </div>
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4"><code class="language-http">GET <%= baseUrl %>/api/sessions</code></pre>
+                            
+                            <h4 class="font-medium text-gray-900 mb-2">Response</h4>
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-json">{
+  "status": "success",
+  "total": 2,
+  "sessions": [
+    {
+      "number": "6281234567890",
+      "has_session": true,
+      "is_connected": true,
+      "expires_in": 7,
+      "expires_days": "7 days"
+    },
+    {
+      "number": "6289876543210",
+      "has_session": false,
+      "is_connected": false,
+      "expires_in": null,
+      "expires_days": "expired"
+    }
+  ]
+}</code></pre>
+                        </div>
+                        
+                        <!-- Delete Session -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900">Delete Session</h3>
+                                <span class="px-3 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full method-delete">DELETE</span>
+                            </div>
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4"><code class="language-http">DELETE <%= baseUrl %>/api/session/{phone_number}</code></pre>
+                            
+                            <h4 class="font-medium text-gray-900 mb-2">Parameters</h4>
+                            <div class="mb-4">
+                                <p class="text-gray-600">
+                                    <code class="bg-gray-100 px-2 py-1 rounded">{phone_number}</code> - WhatsApp number in format 628xxxxxxxxxx
+                                </p>
+                            </div>
+                            
+                            <h4 class="font-medium text-gray-900 mb-2">Example Request</h4>
+                            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-mono">curl</span>
+                                    <button onclick="copyCode('delete-example')" class="text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded">
+                                        <i class="fas fa-copy mr-1"></i> Copy
+                                    </button>
+                                </div>
+                                <pre id="delete-example"><code class="language-bash">curl -X DELETE \
+  '<%= baseUrl %>/api/session/6281234567890' \
+  -H 'X-API-Key: YOUR_API_KEY_HERE'</code></pre>
+                            </div>
+                            
+                            <h4 class="font-medium text-gray-900 mb-2">Response</h4>
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-json">{
+  "status": "success",
+  "message": "Session untuk 6281234567890 berhasil dihapus"
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Tab -->
+                <div id="statistics" class="tab-content">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Statistics</h2>
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full method-get">GET</span>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-http">GET <%= baseUrl %>/api/stats</code></pre>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Example Request</h3>
+                        <div class="mb-8">
+                            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-mono">curl</span>
+                                    <button onclick="copyCode('stats-example')" class="text-xs bg-gray-800 hover:bg-gray-700 px-2 py-1 rounded">
+                                        <i class="fas fa-copy mr-1"></i> Copy
+                                    </button>
+                                </div>
+                                <pre id="stats-example"><code class="language-bash">curl -X GET \
+  '<%= baseUrl %>/api/stats' \
+  -H 'X-API-Key: YOUR_API_KEY_HERE'</code></pre>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Response</h3>
+                        <div class="mb-6">
+                            <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg"><code class="language-json">{
+  "status": "success",
+  "data": {
+    "total_sessions": 5,
+    "active_sessions": 3,
+    "inactive_sessions": 2,
+    "timestamp": "2024-01-01T12:00:00.000Z"
+  }
+}</code></pre>
+                        </div>
+                        
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-700">
+                                        <strong>Note:</strong> These statistics are for the WhatsApp Gateway system overall, not per user.
+                                        For per-user statistics, check your dashboard.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Codes Tab -->
+                <div id="error-codes" class="tab-content">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Error Codes</h2>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HTTP Code</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error Code</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solution</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">400</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">BAD_REQUEST</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Invalid or missing parameters</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Check your request parameters</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">401</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">UNAUTHORIZED</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Missing API key</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Include X-API-Key header or api_key parameter</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">403</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">FORBIDDEN</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Invalid API key</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Check your API key in dashboard</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">429</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">TOO_MANY_REQUESTS</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Daily limit exceeded</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Wait until reset at 6 AM or upgrade plan</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">500</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">INTERNAL_ERROR</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Server internal error</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Contact support or try again later</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">503</span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">SERVICE_UNAVAILABLE</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">WhatsApp service unavailable</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">Try again later or check WhatsApp status</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-8 bg-gray-50 border-l-4 border-gray-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-question-circle text-gray-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="text-sm font-medium text-gray-900">Need Help?</h4>
+                                    <div class="mt-2 text-sm text-gray-700">
+                                        <p>If you encounter any errors not listed here, please contact our support team:</p>
+                                        <a href="https://t.me/Oficiallz" target="_blank" class="inline-flex items-center mt-2 text-primary hover:text-secondary">
+                                            <i class="fab fa-telegram mr-2"></i> Telegram Support
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fab fa-whatsapp text-2xl text-primary mr-2"></i>
+                    <span class="text-xl font-bold text-white">WhatsGate</span>
+                </div>
+                <div class="text-gray-400 text-sm">
+                    <p>© 2024 WhatsGate - Simple WhatsApp API. All rights reserved.</p>
+                    <p class="mt-1">API Version: 1.0.0 • Base URL: <%= baseUrl %></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize syntax highlighting
+        hljs.highlightAll();
+        
+        // Tab switching functionality
+        function showTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+        }
+        
+        // Copy code functionality
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const codeText = codeElement.innerText;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                // Show success message
+                const originalText = event.target.innerHTML;
+                event.target.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                event.target.classList.remove('bg-gray-800');
+                event.target.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    event.target.innerHTML = originalText;
+                    event.target.classList.remove('bg-green-600');
+                    event.target.classList.add('bg-gray-800');
+                }, 2000);
+            });
+        }
+        
+        // Auto-select code on click
+        document.querySelectorAll('pre code').forEach(code => {
+            code.addEventListener('click', function() {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+        });
+    </script>
+</body>
+</html>

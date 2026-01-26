@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar { transition: transform 0.3s ease; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar fixed md:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+            <div class="flex flex-col h-full">
+                <!-- Logo -->
+                <div class="flex items-center justify-between p-6 border-b">
+                    <div class="flex items-center">
+                        <i class="fas fa-comments text-purple-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">WhatsGate</span>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                    <a href="#overview" onclick="showSection('overview')" class="nav-link flex items-center px-4 py-3 text-gray-700 bg-purple-50 text-purple-600 rounded-lg">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        <span>Overview</span>
+                    </a>
+                    <a href="#api" onclick="showSection('api')" class="nav-link flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+                        <i class="fas fa-code mr-3"></i>
+                        <span>API Documentation</span>
+                    </a>
+                    <a href="#info" onclick="showSection('info')" class="nav-link flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+                        <i class="fas fa-info-circle mr-3"></i>
+                        <span>Information</span>
+                    </a>
+                    <a href="#upgrade" onclick="showSection('upgrade')" class="nav-link flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+                        <i class="fas fa-rocket mr-3"></i>
+                        <span>Upgrade Plan</span>
+                    </a>
+                    <% if (user.role === 'admin') { %>
+                    <a href="/admin" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        <span>Admin Panel</span>
+                    </a>
+                    <% } %>
+                </nav>
+
+                <!-- User Menu -->
+                <div class="p-4 border-t">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">
+                            <%= user.username.charAt(0).toUpperCase() %>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900"><%= user.username %></p>
+                            <p class="text-xs text-gray-500"><%= user.plan.toUpperCase() %> Plan</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <button onclick="toggleSidebar()" class="md:hidden text-gray-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                    <a href="https://t.me/yourtelegram" target="_blank" class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        <i class="fab fa-telegram-plane mr-2"></i>
+                        Contact Support
+                    </a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- Overview Section -->
+                <div id="overview-section" class="content-section">
+                    <!-- Stats Cards -->
+                    <div class="grid md:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-gray-600 text-sm">Total Requests (All Users)</span>
+                                <i class="fas fa-globe text-purple-600"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900" id="totalRequestsAll"><%= totalRequestsAllUsers.toLocaleString() %></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-gray-600 text-sm">Your Total Requests</span>
+                                <i class="fas fa-chart-bar text-blue-600"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900"><%= user.total_requests.toLocaleString() %></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-gray-600 text-sm">Today's Usage</span>
+                                <i class="fas fa-calendar-day text-green-600"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900"><%= user.requests_used_today %>/<%= user.daily_limit %></p>
+                            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: <%= (user.requests_used_today / user.daily_limit * 100) %>%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-gray-600 text-sm">Current Plan</span>
+                                <i class="fas fa-star text-yellow-600"></i>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900 uppercase"><%= user.plan %></p>
+                            <% if (user.plan_expires_at) { %>
+                            <p class="text-xs text-gray-500 mt-1">Expires: <%= new Date(user.plan_expires_at).toLocaleDateString() %></p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- API Key Card -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Your API Key</h3>
+                        <div class="flex items-center space-x-2">
+                            <input type="password" id="apiKeyInput" value="<%= user.api_key %>" readonly 
+                                   class="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg font-mono text-sm">
+                            <button onclick="toggleApiKey()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+                                <i id="eyeIcon" class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="copyApiKey()" class="px-4 py-3 bg-purple-600 text-white hover:bg-purple-700 rounded-lg transition">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Keep your API key secure and never share it publicly.</p>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Endpoint</th>
+                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Method</th>
+                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Time</th>
+                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (recentLogs.length === 0) { %>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-8 text-gray-500">No activity yet</td>
+                                    </tr>
+                                    <% } else { %>
+                                        <% recentLogs.forEach(log => { %>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4 text-sm font-mono"><%= log.endpoint %></td>
+                                            <td class="py-3 px-4 text-sm"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"><%= log.method %></span></td>
+                                            <td class="py-3 px-4 text-sm text-gray-600"><%= new Date(log.created_at).toLocaleString() %></td>
+                                            <td class="py-3 px-4 text-sm"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Success</span></td>
+                                        </tr>
+                                        <% }); %>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Documentation Section -->
+                <div id="api-section" class="content-section hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">API Documentation</h2>
+                        
+                        <!-- Send Message Endpoint -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">Send Message</h3>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg mb-3 overflow-x-auto">
+                                <code>GET /api/send</code>
+                            </div>
+                            
+                            <h4 class="font-semibold text-gray-900 mb-2">Parameters:</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">nomor</span>
+                                    <span class="text-gray-600">Your WhatsApp number (format: 628xxx)</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">tujuan</span>
+                                    <span class="text-gray-600">Recipient WhatsApp number (format: 628xxx)</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">message</span>
+                                    <span class="text-gray-600">Message text to send</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">image_url</span>
+                                    <span class="text-gray-600">Optional: Image URL to send with message</span>
+                                </div>
+                            </div>
+
+                            <h4 class="font-semibold text-gray-900 mb-2">Example:</h4>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>curl -X GET "https://yourdomain.com/api/send?nomor=628123456789&tujuan=628987654321&message=Hello%20World" \
+  -H "x-api-key: <%= user.api_key %>"</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Get Code Endpoint -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">Get Pairing Code</h3>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg mb-3 overflow-x-auto">
+                                <code>GET /api/getcode</code>
+                            </div>
+                            
+                            <h4 class="font-semibold text-gray-900 mb-2">Parameters:</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">nomor</span>
+                                    <span class="text-gray-600">Your WhatsApp number (format: 628xxx)</span>
+                                </div>
+                            </div>
+
+                            <h4 class="font-semibold text-gray-900 mb-2">Example:</h4>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>curl -X GET "https://yourdomain.com/api/getcode?nomor=628123456789" \
+  -H "x-api-key: <%= user.api_key %>"</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Section -->
+                <div id="info-section" class="content-section hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Latest Updates & Information</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-purple-600 pl-4 py-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-gray-900">Welcome to WhatsGate API</h3>
+                                    <span class="text-sm text-gray-500">January 2025</span>
+                                </div>
+                                <p class="text-gray-600">Start sending WhatsApp messages programmatically with our powerful API. Free tier includes 6 requests per day, reset daily at 6 AM.</p>
+                            </div>
+
+                            <div class="border-l-4 border-blue-600 pl-4 py-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-gray-900">Rate Limits</h3>
+                                    <span class="text-sm text-gray-500">Important</span>
+                                </div>
+                                <p class="text-gray-600">Your daily request limit resets automatically at 6:00 AM every day. Upgrade your plan for higher limits.</p>
+                            </div>
+
+                            <div class="border-l-4 border-green-600 pl-4 py-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-gray-900">Need Help?</h3>
+                                    <span class="text-sm text-gray-500">Support</span>
+                                </div>
+                                <p class="text-gray-600">Contact our support team via Telegram for any questions or assistance. We're here to help!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upgrade Plan Section -->
+                <div id="upgrade-section" class="content-section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Upgrade Your Plan</h2>
+                        <p class="text-gray-600">Choose a plan that fits your needs</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Free</h3>
+                            <div class="text-3xl font-bold text-purple-600 mb-4">$0<span class="text-lg text-gray-600">/month</span></div>
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> 6 requests/day</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> Basic support</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> API documentation</li>
+                            </ul>
+                            <% if (user.plan === 'free') { %>
+                            <button disabled class="w-full py-3 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed">Current Plan</button>
+                            <% } %>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-purple-600 to-purple-700 p-6 rounded-xl shadow-xl transform scale-105">
+                            <div class="bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">POPULAR</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Pro</h3>
+                            <div class="text-3xl font-bold text-white mb-4">$29<span class="text-lg text-purple-200">/month</span></div>
+                            <ul class="space-y-3 mb-6 text-white">
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> 1,000 requests/day</li>
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> Priority support</li>
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> Advanced features</li>
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> Custom webhook</li>
+                            </ul>
+                            <% if (user.plan === 'pro') { %>
+                            <button disabled class="w-full py-3 bg-white bg-opacity-20 text-white rounded-lg cursor-not-allowed">Current Plan</button>
+                            <% } else { %>
+                            <a href="https://t.me/yourtelegram" target="_blank" class="block text-center w-full py-3 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition">Contact to Upgrade</a>
+                            <% } %>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                            <div class="text-3xl font-bold text-purple-600 mb-4">Custom</div>
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> Unlimited requests</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> 24/7 support</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> Dedicated manager</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> SLA guarantee</li>
+                            </ul>
+                            <a href="https://t.me/yourtelegram" target="_blank" class="block text-center w-full py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition">Contact Sales</a>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+                        <h3 class="font-bold text-blue-900 mb-2"><i class="fas fa-info-circle mr-2"></i>Need a Custom Plan?</h3>
+                        <p class="text-blue-800">Contact our sales team via Telegram to discuss custom request limits, dedicated support, and enterprise features tailored to your needs.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let statsUpdateInterval;
+
+        // Toggle Sidebar (Mobile)
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Show Section
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(section + '-section').classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('bg-purple-50', 'text-purple-600');
+                el.classList.add('text-gray-700');
+            });
+            
+            event.target.closest('.nav-link').classList.add('bg-purple-50', 'text-purple-600');
+            event.target.closest('.nav-link').classList.remove('text-gray-700');
+            
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        // Toggle API Key Visibility
+        function toggleApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const icon = document.getElementById('eyeIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Copy API Key
+        function copyApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const tempInput = document.createElement('input');
+            tempInput.value = input.value;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            alert('API key copied to clipboard!');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Update Stats (Real-time)
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalRequestsAll').textContent = 
+                        data.data.global.total_requests.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+            }
+        }
+
+        // Start updating stats every 30 seconds
+        statsUpdateInterval = setInterval(updateStats, 30000);
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(statsUpdateInterval);
+        });
+    </script>
+</body>
+</html>
