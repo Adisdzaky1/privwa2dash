@@ -54,6 +54,7 @@
         .sidebar {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             color: white;
+            transition: transform 0.3s ease-in-out;
         }
         
         .nav-link.active {
@@ -120,7 +121,7 @@
                 bottom: 0;
                 width: 280px;
                 z-index: 50;
-                transition: left 0.3s ease;
+                transition: left 0.3s ease-in-out;
             }
             
             .sidebar.active {
@@ -183,11 +184,106 @@
         .plan-card.popular {
             box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15);
         }
+        
+        /* Responsive improvements */
+        @media (max-width: 640px) {
+            .stats-card {
+                padding: 1rem !important;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .table-container table {
+                min-width: 600px;
+            }
+            
+            .api-key-container .flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .api-key-container .flex > div {
+                margin-bottom: 1rem;
+            }
+            
+            .api-key-container .flex button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Smooth animations */
+        .nav-link {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stats-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Toast animation */
+        .toast-enter {
+            transform: translateX(100%);
+        }
+        
+        .toast-enter-active {
+            transform: translateX(0);
+            transition: transform 300ms ease-out;
+        }
+        
+        .toast-exit {
+            transform: translateX(0);
+        }
+        
+        .toast-exit-active {
+            transform: translateX(100%);
+            transition: transform 300ms ease-in;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Loading Overlay -->
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center" style="display: none;">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-600 font-medium">Loading dashboard...</p>
+        </div>
+    </div>
+    
     <!-- Mobile Overlay -->
     <div id="mobileOverlay" class="mobile-overlay" onclick="closeSidebar()"></div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
+        <div class="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-xl flex items-center space-x-3 max-w-md">
+            <i id="toastIcon" class="fas fa-check-circle text-green-400"></i>
+            <div>
+                <p id="toastMessage" class="font-medium">Copied to clipboard!</p>
+            </div>
+        </div>
+    </div>
     
     <div class="flex min-h-screen">
         <!-- Sidebar -->
@@ -207,25 +303,25 @@
 
             <!-- Navigation -->
             <nav class="flex-1 p-4 space-y-1">
-                <a href="#overview" onclick="showSection('overview')" 
+                <a href="javascript:void(0);" onclick="showSection('overview')" 
                    class="nav-link active flex items-center px-4 py-3 rounded-xl text-gray-200 hover:text-white transition-all duration-200">
                     <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
                     <span class="font-medium">Overview</span>
                 </a>
                 
-                <a href="#api" onclick="showSection('api')" 
+                <a href="javascript:void(0);" onclick="showSection('api')" 
                    class="nav-link flex items-center px-4 py-3 rounded-xl text-gray-200 hover:text-white transition-all duration-200">
                     <i class="fas fa-code w-5 mr-3 text-center"></i>
                     <span class="font-medium">API Docs</span>
                 </a>
                 
-                <a href="#info" onclick="showSection('info')" 
+                <a href="javascript:void(0);" onclick="showSection('info')" 
                    class="nav-link flex items-center px-4 py-3 rounded-xl text-gray-200 hover:text-white transition-all duration-200">
                     <i class="fas fa-info-circle w-5 mr-3 text-center"></i>
                     <span class="font-medium">Information</span>
                 </a>
                 
-                <a href="#upgrade" onclick="showSection('upgrade')" 
+                <a href="javascript:void(0);" onclick="showSection('upgrade')" 
                    class="nav-link flex items-center px-4 py-3 rounded-xl text-gray-200 hover:text-white transition-all duration-200">
                     <i class="fas fa-rocket w-5 mr-3 text-center"></i>
                     <span class="font-medium">Upgrade</span>
@@ -256,7 +352,7 @@
                     </div>
                 </div>
                 
-                <button onclick="logout()" 
+                <button onclick="handleLogout()" 
                         class="w-full flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-medium transition-all duration-200 active:scale-95">
                     <i class="fas fa-sign-out-alt mr-2"></i>
                     Logout
@@ -385,12 +481,12 @@
                                 <p class="text-purple-200">Keep this secret and never share it publicly</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="toggleApiKey()" 
+                                <button id="toggleApiKeyButton" 
                                         class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-200">
                                     <i id="eyeIcon" class="fas fa-eye mr-2"></i>
                                     <span id="eyeText">Show</span>
                                 </button>
-                                <button onclick="copyApiKey()" 
+                                <button id="copyApiKeyButton" 
                                         class="px-4 py-2.5 bg-white hover:bg-gray-100 text-primary-700 rounded-xl font-medium transition-all duration-200 active:scale-95">
                                     <i class="fas fa-copy mr-2"></i>
                                     Copy
@@ -482,67 +578,265 @@
                     </div>
                 </section>
 
-                <!-- API Documentation Section (Hidden by default) -->
+                <!-- API Documentation Section -->
                 <section id="api-section" class="space-y-6 hidden">
-                    <!-- API Docs content... (keep your existing API docs content, just update styling) -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">API Documentation</h2>
+                        
+                        <!-- Send Message Endpoint -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">Send Message</h3>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg mb-3 overflow-x-auto">
+                                <code>GET /api/send</code>
+                            </div>
+                            
+                            <h4 class="font-semibold text-gray-900 mb-2">Parameters:</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">nomor</span>
+                                    <span class="text-gray-600">Your WhatsApp number (format: 628xxx)</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">tujuan</span>
+                                    <span class="text-gray-600">Recipient WhatsApp number (format: 628xxx)</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">message</span>
+                                    <span class="text-gray-600">Message text to send</span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">image_url</span>
+                                    <span class="text-gray-600">Optional: Image URL to send with message</span>
+                                </div>
+                            </div>
+
+                            <h4 class="font-semibold text-gray-900 mb-2">Example:</h4>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>curl -X GET "https://yourdomain.com/api/send?nomor=628123456789&tujuan=628987654321&message=Hello%20World" \
+  -H "x-api-key: <%= user.api_key %>"</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Get Code Endpoint -->
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">Get Pairing Code</h3>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg mb-3 overflow-x-auto">
+                                <code>GET /api/getcode</code>
+                            </div>
+                            
+                            <h4 class="font-semibold text-gray-900 mb-2">Parameters:</h4>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-start">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mr-3">nomor</span>
+                                    <span class="text-gray-600">Your WhatsApp number (format: 628xxx)</span>
+                                </div>
+                            </div>
+
+                            <h4 class="font-semibold text-gray-900 mb-2">Example:</h4>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>curl -X GET "https://yourdomain.com/api/getcode?nomor=628123456789" \
+  -H "x-api-key: <%= user.api_key %>"</code></pre>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
-                <!-- Information Section (Hidden by default) -->
+                <!-- Information Section -->
                 <section id="info-section" class="space-y-6 hidden">
-                    <!-- Information content... -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Latest Updates & Information</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-purple-600 pl-4 py-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-gray-900">Welcome to WhatsGate API</h3>
+                                    <span class="text-sm text-gray-500">January 2025</span>
+                                </div>
+                                <p class="text-gray-600">Start sending WhatsApp messages programmatically with our powerful API. Free tier includes 6 requests per day, reset daily at 6 AM.</p>
+                            </div>
+
+                            <div class="border-l-4 border-blue-600 pl-4 py-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-gray-900">Rate Limits</h3>
+                                    <span class="text-sm text-gray-500">Important</span>
+                                </div>
+                                <p class="text-gray-600">Your daily request limit resets automatically at 6:00 AM every day. Upgrade your plan for higher limits.</p>
+                            </div>
+
+                            <div class="border-l-4 border-green-600 pl-4 py-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-gray-900">Need Help?</h3>
+                                    <span class="text-sm text-gray-500">Support</span>
+                                </div>
+                                <p class="text-gray-600">Contact our support team via Telegram for any questions or assistance. We're here to help!</p>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
-                <!-- Upgrade Section (Hidden by default) -->
+                <!-- Upgrade Plan Section -->
                 <section id="upgrade-section" class="space-y-6 hidden">
-                    <!-- Upgrade content... -->
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Upgrade Your Plan</h2>
+                        <p class="text-gray-600">Choose a plan that fits your needs</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="plan-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Free</h3>
+                            <div class="text-3xl font-bold text-purple-600 mb-4">$0<span class="text-lg text-gray-600">/month</span></div>
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> 6 requests/day</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> Basic support</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> API documentation</li>
+                            </ul>
+                            <% if (user.plan === 'free') { %>
+                            <button disabled class="w-full py-3 bg-gray-300 text-gray-600 rounded-lg cursor-not-allowed">Current Plan</button>
+                            <% } %>
+                        </div>
+
+                        <div class="plan-card popular bg-gradient-to-br from-purple-600 to-purple-700 p-6 rounded-xl shadow-xl transform scale-105">
+                            <div class="bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">POPULAR</div>
+                            <h3 class="text-xl font-bold text-white mb-2">Pro</h3>
+                            <div class="text-3xl font-bold text-white mb-4">$29<span class="text-lg text-purple-200">/month</span></div>
+                            <ul class="space-y-3 mb-6 text-white">
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> 1,000 requests/day</li>
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> Priority support</li>
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> Advanced features</li>
+                                <li class="flex items-center"><i class="fas fa-check mr-2"></i> Custom webhook</li>
+                            </ul>
+                            <% if (user.plan === 'pro') { %>
+                            <button disabled class="w-full py-3 bg-white bg-opacity-20 text-white rounded-lg cursor-not-allowed">Current Plan</button>
+                            <% } else { %>
+                            <a href="https://t.me/yourtelegram" target="_blank" class="block text-center w-full py-3 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition">Contact to Upgrade</a>
+                            <% } %>
+                        </div>
+
+                        <div class="plan-card bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                            <div class="text-3xl font-bold text-purple-600 mb-4">Custom</div>
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> Unlimited requests</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> 24/7 support</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> Dedicated manager</li>
+                                <li class="flex items-center text-gray-700"><i class="fas fa-check text-green-500 mr-2"></i> SLA guarantee</li>
+                            </ul>
+                            <a href="https://t.me/yourtelegram" target="_blank" class="block text-center w-full py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition">Contact Sales</a>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+                        <h3 class="font-bold text-blue-900 mb-2"><i class="fas fa-info-circle mr-2"></i>Need a Custom Plan?</h3>
+                        <p class="text-blue-800">Contact our sales team via Telegram to discuss custom request limits, dedicated support, and enterprise features tailored to your needs.</p>
+                    </div>
                 </section>
             </main>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
-        <div class="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-xl flex items-center space-x-3 max-w-md">
-            <i id="toastIcon" class="fas fa-check-circle text-green-400"></i>
-            <div>
-                <p id="toastMessage" class="font-medium">Copied to clipboard!</p>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Initialize Dashboard
+        // ==================== GLOBAL VARIABLES ====================
+        let isApiKeyVisible = false;
+        let currentSection = 'overview';
+        let statsInterval = null;
+        
+        // ==================== DEBUG LOG ====================
+        console.log('=== WHATSGATE DASHBOARD LOADED ===');
+        console.log('User:', '<%= user.username %>');
+        console.log('Plan:', '<%= user.plan %>');
+        console.log('API Key:', '<%= user.api_key ? "***" + user.api_key.slice(-8) : "N/A" %>');
+        
+        // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard initialized');
+            console.log('🚀 DOM fully loaded');
             
-            // Set active navigation based on URL hash
+            // Show loading
+            document.getElementById('loading').style.display = 'flex';
+            
+            // Initialize after a short delay
+            setTimeout(initializeDashboard, 100);
+        });
+        
+        function initializeDashboard() {
+            console.log('🔧 Initializing dashboard...');
+            
+            // 1. Setup event listeners
+            setupEventListeners();
+            
+            // 2. Show initial section
             const hash = window.location.hash.substring(1) || 'overview';
             showSection(hash);
             
-            // Start stats updates
+            // 3. Start stats updates
             startStatsUpdates();
             
-            // Close sidebar on mobile when clicking outside
-            document.addEventListener('click', function(event) {
-                const sidebar = document.getElementById('sidebar');
-                const mobileOverlay = document.getElementById('mobileOverlay');
-                
-                if (window.innerWidth < 768 && 
-                    !sidebar.contains(event.target) && 
-                    !event.target.closest('[onclick*="toggleSidebar"]') &&
-                    sidebar.classList.contains('active')) {
-                    closeSidebar();
+            // 4. Hide loading
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                console.log('✅ Dashboard initialized successfully');
+            }, 300);
+        }
+        
+        function setupEventListeners() {
+            console.log('🔗 Setting up event listeners...');
+            
+            // 1. API Key toggle button
+            const toggleBtn = document.getElementById('toggleApiKeyButton');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleApiKey);
+                console.log('✅ API Key toggle button listener added');
+            }
+            
+            // 2. API Key copy button
+            const copyBtn = document.getElementById('copyApiKeyButton');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', copyApiKey);
+                console.log('✅ API Key copy button listener added');
+            }
+            
+            // 3. Logout button
+            const logoutBtn = document.querySelector('button[onclick*="handleLogout"]');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+                console.log('✅ Logout button listener added');
+            }
+            
+            // 4. Mobile overlay
+            const overlay = document.getElementById('mobileOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+            
+            // 5. Navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('onclick')) {
+                    const section = link.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    link.addEventListener('click', () => showSection(section));
                 }
             });
-        });
-
-        // Sidebar Functions
+            
+            // 6. Sidebar toggle button
+            const sidebarToggle = document.querySelector('button[onclick*="toggleSidebar"]');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+            
+            console.log('✅ All event listeners set up');
+        }
+        
+        // ==================== SIDEBAR FUNCTIONS ====================
         function toggleSidebar() {
+            console.log('📱 Toggling sidebar');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('mobileOverlay');
             
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+            if (sidebar) {
+                sidebar.classList.toggle('active');
+            }
+            if (overlay) {
+                overlay.classList.toggle('active');
+            }
             
             // Prevent body scroll when sidebar is open
             if (sidebar.classList.contains('active')) {
@@ -551,106 +845,233 @@
                 document.body.style.overflow = '';
             }
         }
-
+        
         function closeSidebar() {
+            console.log('📱 Closing sidebar');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('mobileOverlay');
             
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
+            if (sidebar) {
+                sidebar.classList.remove('active');
+            }
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
             document.body.style.overflow = '';
         }
-
-        // Section Navigation
+        
+        // ==================== SECTION MANAGEMENT ====================
         function showSection(section) {
+            console.log('📂 Showing section:', section);
+            
             // Hide all sections
             document.querySelectorAll('main > section').forEach(sec => {
                 sec.classList.add('hidden');
             });
             
             // Show selected section
-            const selectedSection = document.getElementById(section + '-section');
-            if (selectedSection) {
-                selectedSection.classList.remove('hidden');
-            }
-            
-            // Update URL hash without scrolling
-            history.replaceState(null, null, '#' + section);
-            
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === '#' + section) {
-                    link.classList.add('active');
+            const targetSection = document.getElementById(section + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                currentSection = section;
+                
+                // Update URL hash without scrolling
+                if (history.replaceState) {
+                    history.replaceState(null, null, '#' + section);
                 }
-            });
+                
+                // Update active nav
+                updateActiveNav(section);
+            }
             
             // Close sidebar on mobile
             if (window.innerWidth < 768) {
                 closeSidebar();
             }
         }
-
-        // API Key Functions
+        
+        function updateActiveNav(section) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                
+                // Extract section from onclick attribute
+                const onclickAttr = link.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(section)) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // ==================== API KEY FUNCTIONS ====================
         function toggleApiKey() {
+            console.log('👁️ Toggling API key visibility');
             const input = document.getElementById('apiKeyInput');
             const eyeIcon = document.getElementById('eyeIcon');
             const eyeText = document.getElementById('eyeText');
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeIcon.className = 'fas fa-eye-slash mr-2';
-                eyeText.textContent = 'Hide';
-            } else {
-                input.type = 'password';
-                eyeIcon.className = 'fas fa-eye mr-2';
-                eyeText.textContent = 'Show';
+            if (!input) {
+                console.error('❌ API Key input not found');
+                showToast('API Key input not found', 'error');
+                return;
+            }
+            
+            isApiKeyVisible = !isApiKeyVisible;
+            input.type = isApiKeyVisible ? 'text' : 'password';
+            
+            if (eyeIcon) {
+                eyeIcon.className = isApiKeyVisible ? 'fas fa-eye-slash mr-2' : 'fas fa-eye mr-2';
+            }
+            
+            if (eyeText) {
+                eyeText.textContent = isApiKeyVisible ? 'Hide' : 'Show';
+            }
+            
+            // Auto-hide after 10 seconds
+            if (isApiKeyVisible) {
+                setTimeout(() => {
+                    if (isApiKeyVisible) {
+                        toggleApiKey();
+                    }
+                }, 10000);
             }
         }
-
+        
         async function copyApiKey() {
+            console.log('📋 Copying API key');
             const input = document.getElementById('apiKeyInput');
-            const status = document.getElementById('apiKeyStatus');
+            
+            if (!input) {
+                console.error('❌ API Key input not found');
+                showToast('API Key input not found', 'error');
+                return;
+            }
             
             try {
-                await navigator.clipboard.writeText(input.value);
-                
-                // Show success toast
-                showToast('API key copied to clipboard!', 'success');
-                
-                // Temporarily show key
-                const wasHidden = input.type === 'password';
-                if (wasHidden) {
-                    input.type = 'text';
-                    setTimeout(() => {
-                        input.type = 'password';
-                    }, 2000);
-                }
-            } catch (err) {
-                // Fallback for older browsers
+                // Select text
                 input.select();
                 input.setSelectionRange(0, 99999);
-                document.execCommand('copy');
                 
-                showToast('API key copied to clipboard!', 'success');
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(input.value);
+                    console.log('✅ API key copied using Clipboard API');
+                } else {
+                    // Fallback for older browsers
+                    document.execCommand('copy');
+                    console.log('✅ API key copied using execCommand');
+                }
+                
+                // Show success toast
+                showToast('API Key copied to clipboard!', 'success');
+                
+                // Visual feedback on button
+                const copyBtn = document.getElementById('copyApiKeyButton');
+                if (copyBtn) {
+                    const originalHTML = copyBtn.innerHTML;
+                    const originalClasses = copyBtn.className;
+                    
+                    copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                    copyBtn.className = originalClasses.replace('bg-white', 'bg-green-500').replace('text-primary-700', 'text-white');
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.className = originalClasses;
+                    }, 2000);
+                }
+                
+            } catch (err) {
+                console.error('❌ Failed to copy:', err);
+                showToast('Failed to copy. Please copy manually.', 'error');
             }
         }
-
-        // Toast Notification
+        
+        // ==================== LOGOUT FUNCTION ====================
+        async function handleLogout() {
+            console.log('🚪 Logout requested');
+            
+            if (!confirm('Are you sure you want to logout?')) {
+                return;
+            }
+            
+            try {
+                // Show loading
+                document.getElementById('loading').style.display = 'flex';
+                
+                console.log('🔄 Sending logout request...');
+                
+                // Send logout request
+                const response = await fetch('/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include' // IMPORTANT: include cookies
+                });
+                
+                console.log('📊 Logout response status:', response.status);
+                
+                const data = await response.json();
+                console.log('📊 Logout response data:', data);
+                
+                if (data.success || response.ok) {
+                    console.log('✅ Logout successful, redirecting...');
+                    
+                    // Clear any local storage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Redirect to login
+                    window.location.href = data.redirect || '/login';
+                    
+                } else {
+                    throw new Error(data.error || 'Logout failed');
+                }
+                
+            } catch (error) {
+                console.error('❌ Logout error:', error);
+                showToast(`Logout failed: ${error.message}`, 'error');
+                
+                // Fallback: try direct redirect after 2 seconds
+                setTimeout(() => {
+                    console.log('🔄 Fallback redirect to login');
+                    window.location.href = '/login';
+                }, 2000);
+                
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // ==================== UTILITY FUNCTIONS ====================
         function showToast(message, type = 'success') {
+            console.log('💬 Toast:', message, type);
+            
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
             const toastIcon = document.getElementById('toastIcon');
             
-            // Set message and icon based on type
+            if (!toast || !toastMessage || !toastIcon) {
+                console.error('❌ Toast elements not found');
+                return;
+            }
+            
+            // Set message
             toastMessage.textContent = message;
             
-            if (type === 'success') {
-                toastIcon.className = 'fas fa-check-circle text-green-400';
-            } else if (type === 'error') {
-                toastIcon.className = 'fas fa-exclamation-circle text-red-400';
-            } else if (type === 'warning') {
-                toastIcon.className = 'fas fa-exclamation-triangle text-yellow-400';
+            // Set icon based on type
+            switch(type) {
+                case 'success':
+                    toastIcon.className = 'fas fa-check-circle text-green-400';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fas fa-exclamation-circle text-red-400';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fas fa-exclamation-triangle text-yellow-400';
+                    break;
+                default:
+                    toastIcon.className = 'fas fa-info-circle text-blue-400';
             }
             
             // Show toast
@@ -661,37 +1082,11 @@
                 toast.classList.add('translate-x-full');
             }, 3000);
         }
-
-        // Logout Function
-        async function logout() {
-            if (!confirm('Are you sure you want to logout?')) {
-                return;
-            }
-            
-            try {
-                const response = await fetch('/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    window.location.href = '/login';
-                } else {
-                    throw new Error('Logout failed');
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-                showToast('Logout failed. Please try again.', 'error');
-            }
-        }
-
-        // Stats Updates
-        let statsInterval;
         
         function startStatsUpdates() {
-            // Update stats immediately
+            console.log('📈 Starting stats updates');
+            
+            // Update immediately
             updateStats();
             
             // Then update every 30 seconds
@@ -700,52 +1095,60 @@
         
         async function updateStats() {
             try {
-                const response = await fetch('/api/stats');
-                if (!response.ok) throw new Error('Failed to fetch stats');
+                console.log('🔄 Updating stats...');
                 
-                const data = await response.json();
+                const response = await fetch('/api/stats', {
+                    credentials: 'include'
+                });
                 
-                if (data.success) {
-                    // Update total requests counter
-                    const totalEl = document.getElementById('totalRequestsAll');
-                    if (totalEl) {
-                        totalEl.textContent = data.data.global.total_requests.toLocaleString();
-                    }
+                if (response.ok) {
+                    const data = await response.json();
                     
-                    // You could update other stats here as needed
+                    if (data.success) {
+                        // Update total requests counter
+                        const totalEl = document.getElementById('totalRequestsAll');
+                        if (totalEl) {
+                            totalEl.textContent = data.data.global.total_requests.toLocaleString();
+                            console.log('📊 Updated stats:', data.data.global.total_requests);
+                        }
+                    }
                 }
             } catch (error) {
-                console.warn('Stats update failed:', error);
+                console.warn('⚠️ Stats update failed:', error);
             }
         }
-
-        // Cleanup on page unload
+        
+        // ==================== WINDOW EVENT LISTENERS ====================
+        // Handle hash changes
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.substring(1) || 'overview';
+            if (hash !== currentSection) {
+                showSection(hash);
+            }
+        });
+        
+        // Handle page unload
         window.addEventListener('beforeunload', () => {
             if (statsInterval) {
                 clearInterval(statsInterval);
             }
         });
-
-        // Handle hash changes
-        window.addEventListener('hashchange', function() {
-            const hash = window.location.hash.substring(1) || 'overview';
-            showSection(hash);
+        
+        // Handle global errors
+        window.addEventListener('error', function(e) {
+            console.error('🌐 Global error:', e.error);
         });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(event) {
-            // Ctrl/Cmd + / to focus API key
-            if ((event.ctrlKey || event.metaKey) && event.key === '/') {
-                event.preventDefault();
-                document.getElementById('apiKeyInput').focus();
-                showToast('API key field focused', 'info');
-            }
-            
-            // Escape to close sidebar
-            if (event.key === 'Escape' && window.innerWidth < 768) {
-                closeSidebar();
-            }
-        });
+        
+        // ==================== EXPORT FUNCTIONS TO GLOBAL SCOPE ====================
+        // This is important for inline onclick handlers
+        window.toggleSidebar = toggleSidebar;
+        window.closeSidebar = closeSidebar;
+        window.showSection = showSection;
+        window.toggleApiKey = toggleApiKey;
+        window.copyApiKey = copyApiKey;
+        window.handleLogout = handleLogout;
+        
+        console.log('✅ All dashboard functions loaded and ready');
     </script>
 </body>
 </html>
