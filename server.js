@@ -87,7 +87,7 @@ app.use(helmet({
         "https://cdn.jsdelivr.net", 
         "https://cdn.tailwindcss.com",
         "https://cdnjs.cloudflare.com",
-        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        "https://fonts.googleapis.com"
       ],
       scriptSrc: [
         "'self'", 
@@ -97,7 +97,7 @@ app.use(helmet({
         "https://www.gstatic.com",
         "https://cdn.tailwindcss.com",
         "https://cdnjs.cloudflare.com",
-        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        "https://fonts.googleapis.com"
       ],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https:"],
