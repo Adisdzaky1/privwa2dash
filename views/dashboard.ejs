@@ -4,10 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    
     <style>
         body { font-family: 'Inter', sans-serif; }
         .sidebar { transition: transform 0.3s ease; }
@@ -345,24 +356,54 @@
     <script>
         let statsUpdateInterval;
 
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loaded');
+            
+            // Initialize
+            initializeDashboard();
+        });
+
+        function initializeDashboard() {
+            // Start stats update
+            statsUpdateInterval = setInterval(updateStats, 30000);
+        }
+
         // Toggle Sidebar (Mobile)
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('active');
+            }
         }
 
         // Show Section
         function showSection(section) {
-            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(section + '-section').classList.remove('hidden');
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.add('hidden');
+            });
             
+            // Show selected section
+            const selectedSection = document.getElementById(section + '-section');
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+            
+            // Update nav links
             document.querySelectorAll('.nav-link').forEach(el => {
                 el.classList.remove('bg-purple-50', 'text-purple-600');
                 el.classList.add('text-gray-700');
             });
             
-            event.target.closest('.nav-link').classList.add('bg-purple-50', 'text-purple-600');
-            event.target.closest('.nav-link').classList.remove('text-gray-700');
+            // Highlight current nav link
+            const clickedLink = event.target.closest('.nav-link');
+            if (clickedLink) {
+                clickedLink.classList.add('bg-purple-50', 'text-purple-600');
+                clickedLink.classList.remove('text-gray-700');
+            }
             
+            // Close sidebar on mobile
             if (window.innerWidth < 768) {
                 toggleSidebar();
             }
@@ -373,35 +414,55 @@
             const input = document.getElementById('apiKeyInput');
             const icon = document.getElementById('eyeIcon');
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+            if (input && icon) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
             }
         }
 
         // Copy API Key
         function copyApiKey() {
             const input = document.getElementById('apiKeyInput');
+            if (!input) return;
+            
             const tempInput = document.createElement('input');
             tempInput.value = input.value;
             document.body.appendChild(tempInput);
             tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
             
-            alert('API key copied to clipboard!');
+            try {
+                document.execCommand('copy');
+                alert('API key copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy. Please copy manually.');
+            }
+            
+            document.body.removeChild(tempInput);
         }
 
         // Logout
         async function logout() {
             try {
-                await fetch('/auth/logout', { method: 'POST' });
-                window.location.href = '/login';
+                const response = await fetch('/auth/logout', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    console.error('Logout failed');
+                }
             } catch (error) {
                 console.error('Logout error:', error);
             }
@@ -414,20 +475,21 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    document.getElementById('totalRequestsAll').textContent = 
-                        data.data.global.total_requests.toLocaleString();
+                    const totalEl = document.getElementById('totalRequestsAll');
+                    if (totalEl) {
+                        totalEl.textContent = data.data.global.total_requests.toLocaleString();
+                    }
                 }
             } catch (error) {
                 console.error('Failed to update stats:', error);
             }
         }
 
-        // Start updating stats every 30 seconds
-        statsUpdateInterval = setInterval(updateStats, 30000);
-
         // Clean up on page unload
         window.addEventListener('beforeunload', () => {
-            clearInterval(statsUpdateInterval);
+            if (statsUpdateInterval) {
+                clearInterval(statsUpdateInterval);
+            }
         });
     </script>
 </body>
