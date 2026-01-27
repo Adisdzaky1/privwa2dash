@@ -1,3 +1,4 @@
+
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -22,10 +23,24 @@ import getcodeHandler from './api/getcode.mjs';
 
 const app = express();
 
-// Supabase client
+// Supabase clients
+// Regular client for auth
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
+);
+
+// Admin client for database operations (bypasses RLS if enabled)
+// Use service_role key for server-side operations
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 // View engine
@@ -126,8 +141,8 @@ const requireAuth = async (req, res, next) => {
       return res.redirect('/login');
     }
 
-    // Get user data from database
-    const { data: userData, error: dbError } = await supabase
+    // Get user data from database (using admin client to bypass RLS)
+    const { data: userData, error: dbError } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('id', user.id)
@@ -183,7 +198,7 @@ const apiKeyAuth = async (req, res, next) => {
     }
 
     // 3. GET USER FROM DATABASE
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('api_key', apiKey)
@@ -219,7 +234,7 @@ const apiKeyAuth = async (req, res, next) => {
         // Plan expired - downgrade to free
         console.log('⏰ Plan expired for user:', user.username);
         
-        await supabase
+        await supabaseAdmin
           .from('users')
           .update({
             plan: 'free',
@@ -240,7 +255,7 @@ const apiKeyAuth = async (req, res, next) => {
     if (user.last_reset_date !== today) {
       console.log('🔄 Resetting daily requests for:', user.username);
       
-      await supabase
+      await supabaseAdmin
         .from('users')
         .update({
           requests_used_today: 0,
@@ -273,7 +288,7 @@ const apiKeyAuth = async (req, res, next) => {
     
     console.log(`📊 Request ${newRequestCount}/${user.daily_limit} for ${user.username}`);
     
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('users')
       .update({
         requests_used_today: newRequestCount,
@@ -286,7 +301,7 @@ const apiKeyAuth = async (req, res, next) => {
     }
 
     // 9. LOG API REQUEST
-    await supabase
+    await supabaseAdmin
       .from('api_logs')
       .insert({
         user_id: user.id,
@@ -323,7 +338,7 @@ const apiKeyAuth = async (req, res, next) => {
 app.get('/', async (req, res) => {
   try {
     // Get total requests from all users
-    const { data: stats } = await supabase
+    const { data: stats } = await supabaseAdmin
       .from('users')
       .select('total_requests');
     
@@ -416,7 +431,7 @@ app.post('/auth/register', async (req, res) => {
     }
 
     // Check if username exists
-    const { data: existingUser } = await supabase
+    const { data: existingUser } = await supabaseAdmin
       .from('users')
       .select('username')
       .eq('username', username)
@@ -444,7 +459,7 @@ app.post('/auth/register', async (req, res) => {
     const apiKey = 'wg_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 
     // Create user record with FREE PLAN (6 requests/day)
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from('users')
       .insert({
         id: authData.user.id,
@@ -538,7 +553,7 @@ app.post('/auth/logout', async (req, res) => {
 app.get('/dashboard', requireAuth, async (req, res) => {
   try {
     // Get user stats
-    const { data: allUsers } = await supabase
+    const { data: allUsers } = await supabaseAdmin
       .from('users')
       .select('total_requests');
     
@@ -547,7 +562,7 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     // Reset daily limit if needed
     const today = new Date().toISOString().split('T')[0];
     if (req.user.last_reset_date !== today) {
-      await supabase
+      await supabaseAdmin
         .from('users')
         .update({
           requests_used_today: 0,
@@ -559,7 +574,7 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     }
 
     // Get recent logs
-    const { data: recentLogs } = await supabase
+    const { data: recentLogs } = await supabaseAdmin
       .from('api_logs')
       .select('*')
       .eq('user_id', req.user.id)
@@ -581,7 +596,7 @@ app.get('/dashboard', requireAuth, async (req, res) => {
 // Admin panel
 app.get('/admin', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { data: users } = await supabase
+    const { data: users } = await supabaseAdmin
       .from('users')
       .select('*')
       .order('created_at', { ascending: false });
@@ -615,7 +630,7 @@ app.post('/admin/update-plan', requireAuth, requireAdmin, async (req, res) => {
       updates.plan_expires_at = null;
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .update(updates)
       .eq('id', userId);
@@ -636,7 +651,7 @@ app.delete('/admin/user/:userId', requireAuth, requireAdmin, async (req, res) =>
   try {
     const { userId } = req.params;
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('users')
       .delete()
       .eq('id', userId);
@@ -653,7 +668,7 @@ app.delete('/admin/user/:userId', requireAuth, requireAdmin, async (req, res) =>
 // Get user stats
 app.get('/api/stats', requireAuth, async (req, res) => {
   try {
-    const { data: allUsers } = await supabase
+    const { data: allUsers } = await supabaseAdmin
       .from('users')
       .select('total_requests, requests_used_today');
     
