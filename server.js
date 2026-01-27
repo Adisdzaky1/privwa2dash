@@ -573,7 +573,7 @@ app.post('/auth/logout', async (req, res) => {
         });
     }
 });
-
+/*
 // Dashboard
 app.get('/dashboard', requireAuth, async (req, res) => {
   try {
@@ -611,6 +611,54 @@ app.get('/dashboard', requireAuth, async (req, res) => {
       user: req.user,
       totalRequestsAllUsers,
       recentLogs: recentLogs || []
+    });
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});*/
+
+// Dashboard route - PERBAIKAN
+app.get('/dashboard', requireAuth, async (req, res) => {
+  try {
+    // Get user stats
+    const { data: allUsers } = await supabaseAdmin
+      .from('users')
+      .select('total_requests');
+    
+    const totalRequestsAllUsers = allUsers?.reduce((sum, user) => sum + (user.total_requests || 0), 0) || 0;
+
+    // Reset daily limit if needed
+    const today = new Date().toISOString().split('T')[0];
+    if (req.user.last_reset_date !== today) {
+      await supabaseAdmin
+        .from('users')
+        .update({
+          requests_used_today: 0,
+          last_reset_date: today
+        })
+        .eq('id', req.user.id);
+      
+      req.user.requests_used_today = 0;
+    }
+
+    // Get recent logs
+    const { data: recentLogs } = await supabaseAdmin
+      .from('api_logs')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    // Tentukan currentSection dari URL hash atau default 'overview'
+    const currentSection = 'overview'; // Default section
+
+    res.render('dashboard', {
+      title: 'Dashboard - WhatsGate',
+      user: req.user,
+      totalRequestsAllUsers,
+      recentLogs: recentLogs || [],
+      currentSection: currentSection // TAMBAHKAN INI
     });
   } catch (error) {
     console.error('Dashboard error:', error);
