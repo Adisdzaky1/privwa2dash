@@ -9,7 +9,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -24,35 +23,10 @@
                             700: '#6d28d9',
                             800: '#5b21b6',
                             900: '#4c1d95',
-                        },
-                        secondary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
                         }
                     },
                     fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                        'jakarta': ['Plus Jakarta Sans', 'sans-serif']
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-in-left': 'slideInLeft 0.3s ease-out',
-                        'slide-in-right': 'slideInRight 0.3s ease-out',
-                        'pulse-slow': 'pulse 3s infinite',
-                        'bounce-slow': 'bounce 2s infinite',
-                    },
-                    boxShadow: {
-                        'soft': '0 10px 40px rgba(0, 0, 0, 0.08)',
-                        'hard': '0 20px 60px rgba(0, 0, 0, 0.15)',
-                        'inner-lg': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+                        'inter': ['Inter', 'sans-serif']
                     }
                 }
             }
@@ -62,577 +36,184 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Boxicons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- AOS (Animate On Scroll) -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
     <style>
-        :root {
-            --primary-color: #7c3aed;
-            --secondary-color: #0ea5e9;
-        }
-        
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
         }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #6d28d9, #0284c7);
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInLeft {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        /* Sidebar Styles - Fixed for both mobile and desktop */
-        .sidebar {
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 280px;
-            z-index: 1000;
-            transform: translateX(-100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .sidebar.active {
-            transform: translateX(0);
-        }
-        
-        /* Overlay for mobile sidebar */
-        .sidebar-overlay {
+        .loading-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 999;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-hidden {
             opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            pointer-events: none;
         }
         
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        /* Navigation Items */
-        .nav-item {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border-radius: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: var(--primary-color);
+        .sidebar {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
         }
         
-        .nav-item:hover::before {
+        .sidebar-open {
             transform: translateX(0);
         }
         
-        .nav-item.active {
-            background: rgba(124, 58, 237, 0.15);
-        }
-        
-        .nav-item.active::before {
-            transform: translateX(0);
-        }
-        
-        /* Card Styles */
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #e2e8f0;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-        }
-        
-        /* Stats Card Glow Effect */
-        .stats-card {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stats-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        }
-        
-        /* Gradient Cards */
-        .gradient-card {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .gradient-card::before {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            transform: translate(-25%, -25%);
-        }
-        
-        /* Progress Bar */
-        .progress-bar {
-            height: 10px;
-            border-radius: 5px;
-            background: #e2e8f0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            border-radius: 5px;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
-            transition: width 1s ease;
-        }
-        
-        /* Table Styles */
-        .table-container {
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .table-container table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .table-container th {
-            background: #f8fafc;
-            font-weight: 600;
-            padding: 16px;
-            text-align: left;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .table-container td {
-            padding: 16px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .table-container tr:hover {
-            background: #f8fafc;
-        }
-        
-        /* Button Styles */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-            outline: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
-        }
-        
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            transform: translateX(150%);
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        
-        .toast.show {
-            transform: translateX(0);
-        }
-        
-        /* Loading Spinner */
-        .loading-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Mobile First Design */
-        @media (max-width: 640px) {
-            .container {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr !important;
-                gap: 1rem !important;
-            }
-            
-            .header-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-                width: 100%;
-            }
-            
-            .header-actions > * {
-                width: 100%;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .table-container {
-                overflow-x: auto;
-            }
-            
-            .table-container table {
-                min-width: 600px;
-            }
-            
-            .plan-cards {
-                grid-template-columns: 1fr !important;
-            }
-        }
-        
-        @media (min-width: 641px) and (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-            
-            .plan-cards {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-        }
-        
-        @media (min-width: 769px) {
+        @media (min-width: 768px) {
             .sidebar {
                 transform: translateX(0);
-                position: fixed;
             }
             
             .main-content {
-                margin-left: 280px;
-            }
-            
-            .mobile-menu-btn {
-                display: none;
-            }
-            
-            .sidebar-overlay {
-                display: none;
+                margin-left: 16rem;
             }
         }
         
-        /* Dark Mode Support */
-        .dark-mode {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 3px solid #8b5cf6;
         }
         
-        .dark-mode .card {
-            background: #1e293b;
-            border-color: #334155;
-            color: #e2e8f0;
+        .stats-card {
+            transition: all 0.3s ease;
         }
         
-        .dark-mode .table-container {
-            border-color: #334155;
-            background: #1e293b;
-        }
-        
-        .dark-mode .table-container th {
-            background: #0f172a;
-            color: #e2e8f0;
-            border-color: #334155;
-        }
-        
-        .dark-mode .table-container td {
-            border-color: #334155;
-            color: #cbd5e1;
-        }
-        
-        .dark-mode .table-container tr:hover {
-            background: #1e293b;
-        }
-        
-        /* Utility Classes */
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .text-gradient {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .hover-lift {
-            transition: transform 0.3s ease;
-        }
-        
-        .hover-lift:hover {
+        .stats-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="font-inter">
-    <!-- Loading Screen -->
-    <div id="loading" class="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center transition-all duration-300">
-        <div class="relative mb-8">
-            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center animate-pulse">
-                <i class="fas fa-comments text-white text-3xl"></i>
-            </div>
-            <div class="absolute -inset-4 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-        </div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2 animate-pulse">Loading Dashboard</h2>
-        <p class="text-gray-600">Please wait...</p>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <div class="card max-w-md">
-            <div class="flex items-center p-4">
-                <i id="toast-icon" class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
-                <div class="flex-1">
-                    <p id="toast-message" class="font-semibold">Operation successful</p>
-                    <p class="text-sm text-gray-600 mt-1" id="toast-description">Your action was completed</p>
-                </div>
-                <button onclick="hideToast()" class="ml-4 text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+<body class="bg-gray-50">
+    <!-- Simple Loading Screen -->
+    <div id="loading" class="loading-screen">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-gray-700 font-medium">Loading dashboard...</p>
         </div>
     </div>
 
     <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closeSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar flex flex-col">
+    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-gray-900 text-white z-50">
         <!-- Logo -->
         <div class="p-6 border-b border-gray-800">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
-                    <i class="fas fa-comments text-white text-xl"></i>
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center mr-3">
+                    <i class="fas fa-comments text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white font-jakarta">WhatsGate</h1>
+                    <h1 class="text-xl font-bold">WhatsGate</h1>
                     <p class="text-xs text-gray-400">API Dashboard</p>
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 p-4">
-            <div class="space-y-1">
-                <a href="#overview" onclick="showSection('overview')" 
-                   class="nav-item active flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/5">
-                    <i class="fas fa-chart-pie w-5 mr-3 text-center text-purple-400"></i>
-                    <div class="flex-1">
-                        <span class="font-medium">Overview</span>
-                        <p class="text-xs text-gray-400 mt-1">Dashboard statistics</p>
-                    </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-500"></i>
-                </a>
-                
-                <a href="#api" onclick="showSection('api')" 
-                   class="nav-item flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/5">
-                    <i class="fas fa-code w-5 mr-3 text-center text-blue-400"></i>
-                    <div class="flex-1">
-                        <span class="font-medium">API Docs</span>
-                        <p class="text-xs text-gray-400 mt-1">Integration guide</p>
-                    </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-500"></i>
-                </a>
-                
-                <a href="#info" onclick="showSection('info')" 
-                   class="nav-item flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/5">
-                    <i class="fas fa-info-circle w-5 mr-3 text-center text-green-400"></i>
-                    <div class="flex-1">
-                        <span class="font-medium">Information</span>
-                        <p class="text-xs text-gray-400 mt-1">Updates & news</p>
-                    </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-500"></i>
-                </a>
-                
-                <a href="#upgrade" onclick="showSection('upgrade')" 
-                   class="nav-item flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/5">
-                    <i class="fas fa-rocket w-5 mr-3 text-center text-yellow-400"></i>
-                    <div class="flex-1">
-                        <span class="font-medium">Upgrade Plan</span>
-                        <p class="text-xs text-gray-400 mt-1">Boost your limits</p>
-                    </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-500"></i>
-                </a>
-                
-                <% if (user.role === 'admin') { %>
-                <a href="/admin" 
-                   class="nav-item flex items-center px-4 py-3 text-gray-200 hover:text-white hover:bg-white/5">
-                    <i class="fas fa-shield-alt w-5 mr-3 text-center text-red-400"></i>
-                    <div class="flex-1">
-                        <span class="font-medium">Admin Panel</span>
-                        <p class="text-xs text-gray-400 mt-1">System management</p>
-                    </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-500"></i>
-                </a>
-                <% } %>
-            </div>
+        <nav class="p-4 space-y-2">
+            <a href="#overview" class="nav-item active flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
+                <i class="fas fa-chart-pie w-5 mr-3"></i>
+                <div>
+                    <span class="font-medium">Overview</span>
+                    <p class="text-xs text-gray-400">Dashboard statistics</p>
+                </div>
+            </a>
+            
+            <a href="#api" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
+                <i class="fas fa-code w-5 mr-3"></i>
+                <div>
+                    <span class="font-medium">API Docs</span>
+                    <p class="text-xs text-gray-400">Integration guide</p>
+                </div>
+            </a>
+            
+            <a href="#info" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
+                <i class="fas fa-info-circle w-5 mr-3"></i>
+                <div>
+                    <span class="font-medium">Information</span>
+                    <p class="text-xs text-gray-400">Updates & news</p>
+                </div>
+            </a>
+            
+            <a href="#upgrade" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
+                <i class="fas fa-rocket w-5 mr-3"></i>
+                <div>
+                    <span class="font-medium">Upgrade Plan</span>
+                    <p class="text-xs text-gray-400">Boost your limits</p>
+                </div>
+            </a>
+            
+            <% if (user.role === 'admin') { %>
+            <a href="/admin" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
+                <i class="fas fa-shield-alt w-5 mr-3"></i>
+                <div>
+                    <span class="font-medium">Admin Panel</span>
+                    <p class="text-xs text-gray-400">System management</p>
+                </div>
+            </a>
+            <% } %>
         </nav>
 
         <!-- User Profile -->
         <div class="p-4 border-t border-gray-800 mt-auto">
             <div class="flex items-center mb-4">
-                <div class="relative">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                        <%= user.username.charAt(0).toUpperCase() %>
-                    </div>
-                    <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-500 border-2 border-gray-900"></div>
+                <div class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold mr-3">
+                    <%= user.username.charAt(0).toUpperCase() %>
                 </div>
-                <div class="ml-3 flex-1">
-                    <p class="font-semibold text-white truncate"><%= user.username %></p>
-                    <div class="flex items-center mt-1 space-x-2">
-                        <span class="text-xs px-2 py-1 bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-purple-300 rounded-full font-medium">
-                            <%= user.plan.toUpperCase() %> PLAN
-                        </span>
-                        <span class="text-xs text-gray-500">
-                            <i class="fas fa-bolt mr-1"></i>
-                            <%= user.requests_used_today %>/<%= user.daily_limit %>
-                        </span>
-                    </div>
+                <div>
+                    <p class="font-medium"><%= user.username %></p>
+                    <span class="text-xs bg-primary-900 text-primary-300 px-2 py-1 rounded">
+                        <%= user.plan.toUpperCase() %> PLAN
+                    </span>
                 </div>
             </div>
             
-            <button onclick="handleLogout()" 
-                    class="w-full btn btn-primary">
-                <i class="fas fa-sign-out-alt mr-2"></i>
-                Logout
+            <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
             </button>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <div id="mainContent" class="main-content min-h-screen">
+    <div id="mainContent" class="main-content">
         <!-- Header -->
-        <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
-            <div class="px-4 sm:px-6 lg:px-8 py-4">
+        <header class="bg-white border-b shadow-sm">
+            <div class="px-4 sm:px-6 py-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <button id="mobileMenuBtn" onclick="toggleSidebar()" 
-                                class="mobile-menu-btn p-2 text-gray-700 hover:text-purple-700 rounded-lg hover:bg-gray-100">
+                    <div class="flex items-center">
+                        <button onclick="toggleSidebar()" class="md:hidden text-gray-700 mr-4">
                             <i class="fas fa-bars text-xl"></i>
                         </button>
                         <div>
-                            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 font-jakarta">Dashboard</h1>
-                            <p class="text-sm text-gray-600">
-                                <i class="fas fa-user-circle mr-1"></i>
-                                Welcome, <span class="font-semibold"><%= user.username %></span>
-                            </p>
+                            <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+                            <p class="text-sm text-gray-600">Welcome, <%= user.username %></p>
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-2 sm:space-x-3 header-actions">
-                        <div class="hidden sm:flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium shadow-md">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-primary-500 text-white px-4 py-2 rounded-lg font-medium">
                             <i class="fas fa-fire mr-2"></i>
-                            <span>Limit: <span class="font-bold"><%= user.requests_used_today %>/<%= user.daily_limit %></span></span>
+                            <%= user.requests_used_today %>/<%= user.daily_limit %>
                         </div>
-                        <a href="https://t.me/yourtelegram" target="_blank" 
-                           class="btn btn-primary px-4 py-2">
-                            <i class="fab fa-telegram-plane mr-2"></i>
-                            <span class="hidden sm:inline">Support</span>
+                        <a href="https://t.me/yourtelegram" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
+                            <i class="fab fa-telegram-plane mr-2"></i>Support
                         </a>
                     </div>
                 </div>
@@ -640,477 +221,193 @@
         </header>
 
         <!-- Content -->
-        <main class="p-4 sm:p-6 lg:p-8">
-            <!-- Overview Section -->
+        <main class="p-4 sm:p-6">
+            <!-- Overview Section (Default Visible) -->
             <section id="overview-section" class="space-y-6">
                 <!-- Stats Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 stats-grid">
-                    <!-- Global Stats -->
-                    <div class="card stats-card p-5 animate-fade-in" data-aos="fade-up">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="p-3 rounded-xl bg-purple-50">
-                                <i class="fas fa-globe text-purple-600 text-xl"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="stats-card bg-white p-6 rounded-xl shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 rounded-lg bg-primary-50 mr-4">
+                                <i class="fas fa-globe text-primary-600"></i>
                             </div>
-                            <span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">GLOBAL</span>
-                        </div>
-                        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1" id="totalRequestsAll">
-                            <%= totalRequestsAllUsers.toLocaleString() %>
-                        </p>
-                        <p class="text-sm text-gray-500">Total requests across all users</p>
-                    </div>
-
-                    <!-- Personal Stats -->
-                    <div class="card stats-card p-5 animate-fade-in" data-aos="fade-up" data-aos-delay="100">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="p-3 rounded-xl bg-blue-50">
-                                <i class="fas fa-chart-line text-blue-600 text-xl"></i>
-                            </div>
-                            <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">PERSONAL</span>
-                        </div>
-                        <p class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-                            <%= user.total_requests.toLocaleString() %>
-                        </p>
-                        <p class="text-sm text-gray-500">Your lifetime requests</p>
-                    </div>
-
-                    <!-- Usage Stats -->
-                    <div class="card stats-card p-5 animate-fade-in" data-aos="fade-up" data-aos-delay="200">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="p-3 rounded-xl bg-green-50">
-                                <i class="fas fa-calendar-day text-green-600 text-xl"></i>
-                            </div>
-                            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">TODAY</span>
-                        </div>
-                        <div class="mb-4">
-                            <p class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-                                <%= user.requests_used_today %>/<%= user.daily_limit %>
-                            </p>
-                            <p class="text-sm text-gray-500">Daily usage</p>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm text-gray-600 mb-2">
-                                <span>Usage</span>
-                                <span class="font-bold"><%= Math.round((user.requests_used_today / user.daily_limit) * 100) %>%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <%= Math.min((user.requests_used_today / user.daily_limit) * 100, 100) %>%"></div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900"><%= totalRequestsAllUsers.toLocaleString() %></p>
+                                <p class="text-sm text-gray-500">Total requests</p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Plan Stats -->
-                    <div class="card stats-card p-5 animate-fade-in" data-aos="fade-up" data-aos-delay="300">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="p-3 rounded-xl bg-yellow-50">
-                                <i class="fas fa-crown text-yellow-600 text-xl"></i>
+                    
+                    <div class="stats-card bg-white p-6 rounded-xl shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 rounded-lg bg-blue-50 mr-4">
+                                <i class="fas fa-chart-bar text-blue-600"></i>
                             </div>
-                            <span class="text-xs font-semibold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">PLAN</span>
-                        </div>
-                        <div class="mb-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-xl sm:text-2xl font-bold text-gray-900 uppercase">
-                                    <%= user.plan %>
-                                </p>
-                                <% if (user.plan !== 'free') { %>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">
-                                    ACTIVE
-                                </span>
-                                <% } %>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900"><%= user.total_requests.toLocaleString() %></p>
+                                <p class="text-sm text-gray-500">Your requests</p>
                             </div>
-                            <p class="text-sm text-gray-500">Current subscription</p>
                         </div>
-                        <% if (user.plan_expires_at) { %>
-                        <div class="text-sm text-gray-600">
-                            <i class="far fa-clock mr-1"></i>
-                            Expires: <%= new Date(user.plan_expires_at).toLocaleDateString() %>
+                    </div>
+                    
+                    <div class="stats-card bg-white p-6 rounded-xl shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 rounded-lg bg-green-50 mr-4">
+                                <i class="fas fa-calendar-day text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900"><%= user.requests_used_today %>/<%= user.daily_limit %></p>
+                                <p class="text-sm text-gray-500">Today's usage</p>
+                            </div>
                         </div>
-                        <% } %>
+                        <div class="mt-4">
+                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full" style="width: <%= (user.requests_used_today / user.daily_limit * 100) %>%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card bg-white p-6 rounded-xl shadow">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 rounded-lg bg-yellow-50 mr-4">
+                                <i class="fas fa-crown text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900 uppercase"><%= user.plan %></p>
+                                <p class="text-sm text-gray-500">Current plan</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- API Key Section -->
-                <div class="gradient-card rounded-2xl p-5 sm:p-6 shadow-lg animate-fade-in" data-aos="fade-up">
-                    <div class="relative z-10">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-4">
-                            <div>
-                                <h3 class="text-lg sm:text-xl font-bold text-white mb-1">Your API Key</h3>
-                                <p class="text-purple-200 text-sm">Keep this secret and never share it publicly</p>
-                            </div>
-                            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                                <button id="toggleApiKeyBtn" 
-                                        class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-200">
-                                    <i id="eyeIcon" class="fas fa-eye mr-2"></i>
-                                    <span id="eyeText">Show Key</span>
-                                </button>
-                                <button id="copyApiKeyBtn" 
-                                        class="px-4 py-2.5 bg-white hover:bg-gray-100 text-purple-700 rounded-xl font-medium transition-all duration-200">
-                                    <i class="fas fa-copy mr-2"></i>
-                                    Copy Key
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="relative mb-4">
-                            <input type="password" 
-                                   id="apiKeyInput" 
-                                   value="<%= user.api_key %>" 
-                                   readonly
-                                   class="w-full px-4 py-3 pl-12 bg-white/10 border border-white/20 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-white/50">
-                            <div class="absolute left-4 top-1/2 transform -translate-y-1/2">
-                                <i class="fas fa-key text-white/70"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center text-purple-200 text-sm">
-                            <i class="fas fa-shield-alt mr-2"></i>
-                            <span>This key grants access to your account. Store it securely.</span>
-                        </div>
+                <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-6 rounded-xl">
+                    <div class="mb-4">
+                        <h3 class="text-xl font-bold mb-2">Your API Key</h3>
+                        <p class="text-primary-100">Keep this key secret</p>
+                    </div>
+                    
+                    <div class="relative mb-4">
+                        <input type="password" 
+                               id="apiKey" 
+                               value="<%= user.api_key %>" 
+                               readonly
+                               class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white font-mono">
+                        <button onclick="toggleApiKey()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white">
+                            <i id="eyeIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="copyApiKey()" class="bg-white text-primary-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-100">
+                            <i class="fas fa-copy mr-2"></i>Copy Key
+                        </button>
+                        <button onclick="toggleApiKey()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium">
+                            <span id="toggleText">Show Key</span>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
-                <div class="card animate-fade-in" data-aos="fade-up">
-                    <div class="p-5 sm:p-6 border-b border-gray-100">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1">Recent Activity</h3>
-                                <p class="text-sm text-gray-600">Your latest API requests</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm text-gray-500">
-                                    Last <%= recentLogs.length %> requests
-                                </span>
-                                <span class="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-semibold">
-                                    <i class="fas fa-bolt mr-1"></i>Live
-                                </span>
-                            </div>
-                        </div>
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b">
+                        <h3 class="text-lg font-bold text-gray-900">Recent Activity</h3>
                     </div>
-                    
                     <div class="overflow-x-auto">
-                        <div class="table-container">
-                            <table>
-                                <thead>
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Endpoint</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <% if (recentLogs.length === 0) { %>
+                                <tr>
+                                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                        No activity yet
+                                    </td>
+                                </tr>
+                                <% } else { %>
+                                    <% recentLogs.forEach(log => { %>
                                     <tr>
-                                        <th>Endpoint</th>
-                                        <th>Method</th>
-                                        <th>Time</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (recentLogs.length === 0) { %>
-                                    <tr>
-                                        <td colspan="4" class="text-center py-12">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                                                    <i class="fas fa-inbox text-gray-400 text-2xl"></i>
-                                                </div>
-                                                <p class="text-gray-500 font-semibold">No activity yet</p>
-                                                <p class="text-gray-400 text-sm mt-1">Your API requests will appear here</p>
-                                            </div>
+                                        <td class="px-6 py-4 text-sm font-mono"><%= log.endpoint %></td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 text-xs rounded <%= log.method === 'GET' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' %>">
+                                                <%= log.method %>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                            <%= new Date(log.created_at).toLocaleTimeString() %>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Success</span>
                                         </td>
                                     </tr>
-                                    <% } else { %>
-                                        <% recentLogs.forEach((log, index) => { %>
-                                        <tr>
-                                            <td class="font-mono text-sm">
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-link text-gray-400 mr-2 text-xs"></i>
-                                                    <span class="truncate max-w-xs"><%= log.endpoint %></span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="px-3 py-1 rounded-full text-xs font-medium 
-                                                      <%= log.method === 'GET' ? 'bg-blue-100 text-blue-800' : 
-                                                         log.method === 'POST' ? 'bg-green-100 text-green-800' : 
-                                                         'bg-gray-100 text-gray-800' %>">
-                                                    <%= log.method %>
-                                                </span>
-                                            </td>
-                                            <td class="text-gray-600">
-                                                <%= new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
-                                            </td>
-                                            <td>
-                                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    <i class="fas fa-check mr-1"></i>Success
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <% }); %>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                    <% }); %>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
 
-            <!-- API Documentation Section -->
+            <!-- API Docs Section (Hidden by default) -->
             <section id="api-section" class="space-y-6 hidden">
-                <div class="card p-5 sm:p-6 animate-fade-in" data-aos="fade-up">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">API Documentation</h2>
-                    
-                    <!-- Authentication -->
-                    <div class="mb-6 p-4 bg-blue-50 rounded-xl">
-                        <h3 class="font-bold text-blue-900 mb-2">Authentication</h3>
-                        <p class="text-blue-800 text-sm">All requests require your API key in the header:</p>
-                        <div class="bg-gray-900 text-gray-200 p-4 rounded-lg mt-2 overflow-x-auto">
-                            <code class="text-sm">x-api-key: <%= user.api_key %></code>
-                        </div>
-                    </div>
-
-                    <!-- Send Message Endpoint -->
-                    <div class="mb-8">
-                        <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Send Message</h3>
-                        <div class="bg-gray-900 text-white p-4 rounded-lg mb-3 overflow-x-auto">
-                            <code>POST /api/send</code>
-                        </div>
-                        
-                        <h4 class="font-semibold text-gray-900 mb-2">Parameters:</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <span class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mb-2">nomor</span>
-                                <p class="text-gray-600 text-sm">Your WhatsApp number (format: 628xxx)</p>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <span class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mb-2">tujuan</span>
-                                <p class="text-gray-600 text-sm">Recipient WhatsApp number (format: 628xxx)</p>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <span class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mb-2">message</span>
-                                <p class="text-gray-600 text-sm">Message text to send</p>
-                            </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <span class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mb-2">image_url</span>
-                                <p class="text-gray-600 text-sm">Optional: Image URL to send with message</p>
-                            </div>
-                        </div>
-
-                        <h4 class="font-semibold text-gray-900 mb-2">Example:</h4>
-                        <div class="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
-                            <pre class="text-sm"><code>curl -X POST "https://yourdomain.com/api/send" \
-  -H "x-api-key: <%= user.api_key %>" \
-  -d 'nomor=628123456789&tujuan=628987654321&message=Hello%20World'</code></pre>
-                        </div>
-                    </div>
-
-                    <!-- Get Code Endpoint -->
-                    <div class="mb-8">
-                        <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Get Pairing Code</h3>
-                        <div class="bg-gray-900 text-white p-4 rounded-lg mb-3 overflow-x-auto">
-                            <code>GET /api/getcode</code>
-                        </div>
-                        
-                        <h4 class="font-semibold text-gray-900 mb-2">Parameters:</h4>
-                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                            <span class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-mono mb-2">nomor</span>
-                            <p class="text-gray-600 text-sm">Your WhatsApp number (format: 628xxx)</p>
-                        </div>
-
-                        <h4 class="font-semibold text-gray-900 mb-2">Example:</h4>
-                        <div class="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
-                            <pre class="text-sm"><code>curl -X GET "https://yourdomain.com/api/getcode?nomor=628123456789" \
-  -H "x-api-key: <%= user.api_key %>"</code></pre>
-                        </div>
-                    </div>
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">API Documentation</h2>
+                    <!-- API docs content -->
                 </div>
             </section>
 
-            <!-- Information Section -->
+            <!-- Info Section (Hidden by default) -->
             <section id="info-section" class="space-y-6 hidden">
-                <div class="card p-5 sm:p-6 animate-fade-in" data-aos="fade-up">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Latest Updates & Information</h2>
-                    
-                    <div class="space-y-4">
-                        <!-- Update 1 -->
-                        <div class="border-l-4 border-purple-600 pl-4 py-3">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900">Welcome to WhatsGate API</h3>
-                                <span class="text-sm text-gray-500 mt-1 sm:mt-0">January 2025</span>
-                            </div>
-                            <p class="text-gray-600 text-sm">Start sending WhatsApp messages programmatically with our powerful API.</p>
-                        </div>
-
-                        <!-- Update 2 -->
-                        <div class="border-l-4 border-blue-600 pl-4 py-3">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900">Rate Limits</h3>
-                                <span class="text-sm text-gray-500 mt-1 sm:mt-0">Important</span>
-                            </div>
-                            <p class="text-gray-600 text-sm">Your daily request limit resets automatically at 00:00 UTC every day.</p>
-                        </div>
-
-                        <!-- Update 3 -->
-                        <div class="border-l-4 border-green-600 pl-4 py-3">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-1">
-                                <h3 class="font-semibold text-gray-900">Need Help?</h3>
-                                <span class="text-sm text-gray-500 mt-1 sm:mt-0">Support</span>
-                            </div>
-                            <p class="text-gray-600 text-sm">Contact our support team via Telegram for any questions or assistance.</p>
-                        </div>
-                    </div>
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Information</h2>
+                    <!-- Info content -->
                 </div>
             </section>
 
-            <!-- Upgrade Plan Section -->
+            <!-- Upgrade Section (Hidden by default) -->
             <section id="upgrade-section" class="space-y-6 hidden">
-                <div class="mb-6">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Upgrade Your Plan</h2>
-                    <p class="text-gray-600">Choose a plan that fits your needs</p>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 plan-cards">
-                    <!-- Free Plan -->
-                    <div class="card p-5 sm:p-6 hover-lift" data-aos="fade-up">
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Free</h3>
-                        <div class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">$0<span class="text-lg text-gray-600">/month</span></div>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">10 requests/day</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">Basic support</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">API documentation</span>
-                            </li>
-                        </ul>
-                        <% if (user.plan === 'free') { %>
-                        <button disabled class="w-full py-3 bg-gray-200 text-gray-600 rounded-xl cursor-not-allowed">
-                            Current Plan
-                        </button>
-                        <% } else { %>
-                        <button class="w-full py-3 bg-gray-100 text-gray-800 rounded-xl font-medium hover:bg-gray-200">
-                            Select Free
-                        </button>
-                        <% } %>
-                    </div>
-
-                    <!-- Pro Plan -->
-                    <div class="card p-5 sm:p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 hover-lift" data-aos="fade-up" data-aos-delay="100">
-                        <div class="inline-block bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-full mb-3">POPULAR</div>
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Pro</h3>
-                        <div class="text-2xl sm:text-3xl font-bold text-purple-600 mb-4">$29<span class="text-lg text-purple-400">/month</span></div>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">1,000 requests/day</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">Priority support</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">Advanced features</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">Custom webhook</span>
-                            </li>
-                        </ul>
-                        <% if (user.plan === 'pro') { %>
-                        <button disabled class="w-full py-3 bg-purple-100 text-purple-700 rounded-xl cursor-not-allowed">
-                            Current Plan
-                        </button>
-                        <% } else { %>
-                        <a href="https://t.me/yourtelegram" target="_blank" class="block text-center w-full py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700">
-                            Contact to Upgrade
-                        </a>
-                        <% } %>
-                    </div>
-
-                    <!-- Enterprise Plan -->
-                    <div class="card p-5 sm:p-6 hover-lift" data-aos="fade-up" data-aos-delay="200">
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                        <div class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">Custom</div>
-                        <ul class="space-y-3 mb-6">
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">Unlimited requests</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">24/7 support</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">Dedicated manager</span>
-                            </li>
-                            <li class="flex items-center text-gray-700">
-                                <i class="fas fa-check text-green-500 mr-2 w-5"></i>
-                                <span class="text-sm">SLA guarantee</span>
-                            </li>
-                        </ul>
-                        <a href="https://t.me/yourtelegram" target="_blank" class="block text-center w-full py-3 bg-gray-800 text-white rounded-xl font-medium hover:bg-gray-900">
-                            Contact Sales
-                        </a>
-                    </div>
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Upgrade Plan</h2>
+                    <!-- Upgrade content -->
                 </div>
             </section>
         </main>
-
-        <!-- Footer -->
-        <footer class="bg-gray-50 border-t border-gray-200 py-6 px-4 sm:px-6 lg:px-8">
-            <div class="text-center text-gray-600 text-sm">
-                <p>© 2025 WhatsGate API. All rights reserved.</p>
-                <p class="mt-2">Contact: <a href="https://t.me/yourtelegram" target="_blank" class="text-purple-600 hover:text-purple-800">@yourtelegram</a></p>
-            </div>
-        </footer>
     </div>
 
-    <!-- AOS Script -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
     <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
-        });
-
-        // ==================== INITIALIZATION ====================
+        // Simple initialization without complex error handling
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 WhatsGate Dashboard Initializing...');
+            console.log('Dashboard loaded');
             
-            // Hide loading screen
-            setTimeout(() => {
-                document.getElementById('loading').style.opacity = '0';
-                setTimeout(() => {
+            // Hide loading screen immediately
+            setTimeout(function() {
+                document.getElementById('loading').classList.add('loading-hidden');
+                
+                // Remove loading screen from DOM after animation
+                setTimeout(function() {
                     document.getElementById('loading').style.display = 'none';
-                    console.log('✅ Dashboard loaded successfully');
                 }, 300);
-            }, 1000);
+            }, 500);
             
-            // Initialize dashboard
-            initializeDashboard();
+            // Initialize navigation
+            initNavigation();
+            
+            // Setup API key functionality
+            initApiKey();
         });
         
-        function initializeDashboard() {
-            // Setup event listeners
-            setupEventListeners();
-            
-            // Check URL hash for section
+        function initNavigation() {
+            // Get current hash from URL
             const hash = window.location.hash.substring(1) || 'overview';
             showSection(hash);
             
-            // Initialize mobile menu
-            initMobileMenu();
-        }
-        
-        function setupEventListeners() {
-            // API Key toggle button
-            document.getElementById('toggleApiKeyBtn')?.addEventListener('click', toggleApiKey);
-            
-            // API Key copy button
-            document.getElementById('copyApiKeyBtn')?.addEventListener('click', copyApiKey);
-            
-            // Navigation links
+            // Set up navigation links
             document.querySelectorAll('a[href^="#"]').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1119,72 +416,32 @@
                 });
             });
             
-            // Window resize handler
-            window.addEventListener('resize', handleResize);
-            
-            // Keyboard shortcuts
-            document.addEventListener('keydown', handleKeyboardShortcuts);
-            
-            console.log('✅ Event listeners initialized');
+            // Handle hash changes
+            window.addEventListener('hashchange', function() {
+                const hash = window.location.hash.substring(1) || 'overview';
+                showSection(hash);
+            });
         }
         
-        function initMobileMenu() {
-            // Check if mobile
-            if (window.innerWidth < 768) {
-                document.getElementById('mobileMenuBtn').classList.remove('hidden');
-            }
-        }
-        
-        // ==================== SIDEBAR FUNCTIONS ====================
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Prevent body scroll when sidebar is open on mobile
-            if (window.innerWidth < 768) {
-                if (sidebar.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            }
-        }
-        
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        
-        // ==================== SECTION MANAGEMENT ====================
         function showSection(section) {
-            console.log('📂 Showing section:', section);
-            
             // Hide all sections
             document.querySelectorAll('main > section').forEach(sec => {
                 sec.classList.add('hidden');
             });
             
             // Show selected section
-            const targetSection = document.getElementById(section + '-section');
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-                
-                // Update URL hash
-                history.replaceState(null, null, '#' + section);
-                
-                // Update active navigation
-                updateActiveNav(section);
-                
-                // Scroll to top of section
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+            const target = document.getElementById(section + '-section');
+            if (target) {
+                target.classList.remove('hidden');
             }
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + section) {
+                    item.classList.add('active');
+                }
+            });
             
             // Close sidebar on mobile
             if (window.innerWidth < 768) {
@@ -1192,178 +449,66 @@
             }
         }
         
-        function updateActiveNav(section) {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                const href = item.getAttribute('href');
-                if (href === '#' + section) {
-                    item.classList.add('active');
-                }
-            });
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('sidebar-open');
+            overlay.classList.toggle('hidden');
         }
         
-        // ==================== API KEY FUNCTIONS ====================
-        let isApiKeyVisible = false;
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.remove('sidebar-open');
+            overlay.classList.add('hidden');
+        }
+        
+        // API Key Functions
+        function initApiKey() {
+            window.isApiKeyVisible = false;
+        }
         
         function toggleApiKey() {
-            const input = document.getElementById('apiKeyInput');
+            const input = document.getElementById('apiKey');
             const eyeIcon = document.getElementById('eyeIcon');
-            const eyeText = document.getElementById('eyeText');
+            const toggleText = document.getElementById('toggleText');
             
-            isApiKeyVisible = !isApiKeyVisible;
-            input.type = isApiKeyVisible ? 'text' : 'password';
-            
-            if (eyeIcon) {
-                eyeIcon.className = isApiKeyVisible ? 'fas fa-eye-slash mr-2' : 'fas fa-eye mr-2';
-            }
-            
-            if (eyeText) {
-                eyeText.textContent = isApiKeyVisible ? 'Hide Key' : 'Show Key';
-            }
-            
-            // Auto-hide after 10 seconds
-            if (isApiKeyVisible) {
-                setTimeout(() => {
-                    if (isApiKeyVisible) {
-                        toggleApiKey();
-                    }
-                }, 10000);
-            }
+            window.isApiKeyVisible = !window.isApiKeyVisible;
+            input.type = window.isApiKeyVisible ? 'text' : 'password';
+            eyeIcon.className = window.isApiKeyVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+            toggleText.textContent = window.isApiKeyVisible ? 'Hide Key' : 'Show Key';
         }
         
-        async function copyApiKey() {
-            const input = document.getElementById('apiKeyInput');
+        function copyApiKey() {
+            const input = document.getElementById('apiKey');
+            
+            input.select();
+            input.setSelectionRange(0, 99999);
             
             try {
-                // Try modern clipboard API
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(input.value);
-                    console.log('✅ API key copied using Clipboard API');
-                } else {
-                    // Fallback for older browsers
-                    input.select();
-                    input.setSelectionRange(0, 99999);
-                    document.execCommand('copy');
-                    console.log('✅ API key copied using execCommand');
-                }
-                
-                // Show success toast
-                showToast('API Key copied to clipboard!', 'success', 'You can now paste it in your applications');
-                
-                // Button feedback
-                const btn = document.getElementById('copyApiKeyBtn');
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
-                btn.classList.add('bg-green-100', 'text-green-700');
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.classList.remove('bg-green-100', 'text-green-700');
-                }, 2000);
-                
+                navigator.clipboard.writeText(input.value);
+                alert('API key copied to clipboard!');
             } catch (err) {
-                console.error('❌ Failed to copy:', err);
-                showToast('Failed to copy. Please copy manually.', 'error', 'Select and copy the text manually');
+                // Fallback for older browsers
+                document.execCommand('copy');
+                alert('API key copied!');
             }
         }
         
-        // ==================== TOAST NOTIFICATION ====================
-        function showToast(message, type = 'success', description = '') {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toast-icon');
-            const toastMessage = document.getElementById('toast-message');
-            const toastDesc = document.getElementById('toast-description');
-            
-            // Set content
-            toastMessage.textContent = message;
-            toastDesc.textContent = description;
-            
-            // Set icon based on type
-            const icons = {
-                success: 'fa-check-circle text-green-500',
-                error: 'fa-exclamation-circle text-red-500',
-                warning: 'fa-exclamation-triangle text-yellow-500',
-                info: 'fa-info-circle text-blue-500'
-            };
-            
-            toastIcon.className = `fas ${icons[type] || icons.success}`;
-            
-            // Show toast
-            toast.classList.add('show');
-            
-            // Auto hide after 4 seconds
-            setTimeout(hideToast, 4000);
-        }
-        
-        function hideToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.remove('show');
-        }
-        
-        // ==================== UTILITY FUNCTIONS ====================
-        function handleResize() {
-            // Close sidebar on desktop
-            if (window.innerWidth >= 768) {
-                closeSidebar();
-            }
-            
-            // Show/hide mobile menu button
-            const mobileBtn = document.getElementById('mobileMenuBtn');
-            if (window.innerWidth < 768) {
-                mobileBtn.classList.remove('hidden');
-            } else {
-                mobileBtn.classList.add('hidden');
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/auth/logout';
             }
         }
         
-        function handleKeyboardShortcuts(e) {
-            // Escape key closes sidebar
-            if (e.key === 'Escape') {
-                closeSidebar();
-            }
-            
-            // Ctrl/Cmd + S to show stats
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                showSection('overview');
-            }
-        }
-        
-        async function handleLogout() {
-            if (!confirm('Are you sure you want to logout?')) return;
-            
-            try {
-                // Show loading
-                document.getElementById('loading').style.display = 'flex';
-                document.getElementById('loading').style.opacity = '1';
-                
-                const response = await fetch('/auth/logout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (response.ok) {
-                    window.location.href = '/login';
-                } else {
-                    throw new Error('Logout failed');
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-                showToast('Logout failed. Please try again.', 'error');
-                document.getElementById('loading').style.display = 'none';
-            }
-        }
-        
-        // ==================== GLOBAL FUNCTIONS ====================
+        // Expose functions to global scope for inline onclick handlers
         window.toggleSidebar = toggleSidebar;
         window.closeSidebar = closeSidebar;
-        window.showSection = showSection;
         window.toggleApiKey = toggleApiKey;
         window.copyApiKey = copyApiKey;
-        window.handleLogout = handleLogout;
-        window.hideToast = hideToast;
-        
-        console.log('✅ Dashboard ready');
+        window.logout = logout;
     </script>
 </body>
 </html>
