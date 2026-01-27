@@ -23,14 +23,11 @@ import getcodeHandler from './api/getcode.mjs';
 const app = express();
 
 // Supabase clients
-// Regular client for auth
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 
-// Admin client for database operations (bypasses RLS if enabled)
-// Use service_role key for server-side operations
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY,
@@ -47,10 +44,64 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('json spaces', 2);
 
-// Trust proxy
+// Trust proxy (important for Vercel)
 app.set('trust proxy', 1);
 
-// Security middlewares
+// ==================== CRITICAL FIX: SESSION CONFIG ====================
+const isProduction = process.env.NODE_ENV === 'production';
+const sessionSecret = process.env.SESSION_SECRET || 'whatsgate-secret-key-change-this-production';
+
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: isProduction, // true in production, false in development
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax', // 'none' for Vercel
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    path: '/'
+  },
+  store: isProduction ? undefined : new session.MemoryStore() // Use memory store for development
+}));
+
+// ==================== CRITICAL FIX: CORS CONFIG ====================
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      process.env.FRONTEND_URL,
+      // Vercel domains
+      /\.vercel\.app$/,
+      /\.vercel\.domain$/
+    ].filter(Boolean);
+    
+    if (allowedOrigins.some(allowed => {
+      if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return allowed === origin;
+    })) {
+      callback(null, true);
+    } else {
+      console.warn('CORS blocked for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // MUST BE TRUE FOR COOKIES
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'X-Requested-With'],
+  exposedHeaders: ['set-cookie']
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// ==================== SECURITY MIDDLEWARES ====================
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -60,7 +111,7 @@ app.use(helmet({
         "'unsafe-inline'", 
         "https://cdn.jsdelivr.net", 
         "https://fonts.googleapis.com",
-        "https://cdn.tailwindcss.com"  // ⬅️ TAMBAHKAN INI
+        "https://cdn.tailwindcss.com"
       ],
       scriptSrc: [
         "'self'", 
@@ -68,29 +119,25 @@ app.use(helmet({
         "https://cdn.jsdelivr.net", 
         "https://www.google.com", 
         "https://www.gstatic.com",
-        "https://cdn.tailwindcss.com"  // ⬅️ TAMBAHKAN INI
+        "https://cdn.tailwindcss.com"
       ],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
       frameSrc: ["https://www.google.com"],
-      connectSrc: ["'self'", "https://www.google.com", "https://www.gstatic.com"],  // ⬅️ TAMBAHKAN INI
+      connectSrc: ["'self'", "https://www.google.com", "https://www.gstatic.com"],
     },
   },
   crossOriginEmbedderPolicy: false,
-}));
-
-// CORS
-app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.'
 });
-app.use(limiter);
+app.use('/api/', limiter);
 
 // Body parsers
 app.use(express.json({ limit: '10mb' }));
@@ -98,25 +145,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(compression());
 
-// Session
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'whatsgate-secret-key-change-this',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true, // ⬅️ ALWAYS true untuk HTTPS (Vercel)
-    httpOnly: true,
-    sameSite: 'lax', // ⬅️ TAMBAHKAN INI
-    maxAge: 24 * 60 * 60 * 1000,
-    path: '/' // ⬅️ TAMBAHKAN INI
-  }
-}));
-
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Logging
-app.use(morgan('dev'));
+app.use(morgan(isProduction ? 'combined' : 'dev'));
 
 // ==================== MIDDLEWARE ====================
 
@@ -140,7 +173,7 @@ const requireAuth = async (req, res, next) => {
       return res.redirect('/login');
     }
 
-    // Get user data from database (using admin client to bypass RLS)
+    // Get user data from database
     const { data: userData, error: dbError } = await supabaseAdmin
       .from('users')
       .select('*')
@@ -172,13 +205,11 @@ const requireAdmin = async (req, res, next) => {
   next();
 };
 
-// ==================== ENHANCED API KEY MIDDLEWARE ====================
-
+// ==================== API KEY MIDDLEWARE ====================
 const apiKeyAuth = async (req, res, next) => {
   try {
     const apiKey = req.headers['x-api-key'] || req.query.api_key;
     
-    // 1. CHECK API KEY EXISTS
     if (!apiKey) {
       return res.status(401).json({
         status: 'error',
@@ -187,7 +218,6 @@ const apiKeyAuth = async (req, res, next) => {
       });
     }
 
-    // 2. VALIDATE API KEY FORMAT
     if (!apiKey.startsWith('wg_')) {
       return res.status(403).json({
         status: 'error',
@@ -196,7 +226,6 @@ const apiKeyAuth = async (req, res, next) => {
       });
     }
 
-    // 3. GET USER FROM DATABASE
     const { data: user, error } = await supabaseAdmin
       .from('users')
       .select('*')
@@ -214,7 +243,7 @@ const apiKeyAuth = async (req, res, next) => {
 
     console.log('✅ Valid API key for user:', user.username);
 
-    // 4. CHECK IF EMAIL IS VERIFIED (skip if can't verify)
+    // Check if email is verified
     try {
       const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
       
@@ -227,17 +256,15 @@ const apiKeyAuth = async (req, res, next) => {
         });
       }
     } catch (authCheckError) {
-      // If we can't check, log warning but continue
-      console.log('⚠️ Could not verify email status, allowing request:', authCheckError.message);
+      console.log('⚠️ Could not verify email status:', authCheckError.message);
     }
 
-    // 5. CHECK PLAN EXPIRATION
+    // Check plan expiration
     if (user.plan_expires_at) {
       const expiryDate = new Date(user.plan_expires_at);
       const now = new Date();
       
       if (now > expiryDate) {
-        // Plan expired - downgrade to free
         console.log('⏰ Plan expired for user:', user.username);
         
         await supabaseAdmin
@@ -255,7 +282,7 @@ const apiKeyAuth = async (req, res, next) => {
       }
     }
 
-    // 6. AUTO-RESET DAILY REQUESTS IF NEW DAY
+    // Auto-reset daily requests if new day
     const today = new Date().toISOString().split('T')[0];
     
     if (user.last_reset_date !== today) {
@@ -273,7 +300,7 @@ const apiKeyAuth = async (req, res, next) => {
       user.last_reset_date = today;
     }
 
-    // 7. CHECK DAILY LIMIT
+    // Check daily limit
     if (user.requests_used_today >= user.daily_limit) {
       console.log('🚫 Daily limit reached for:', user.username, 
                   `(${user.requests_used_today}/${user.daily_limit})`);
@@ -288,7 +315,7 @@ const apiKeyAuth = async (req, res, next) => {
       });
     }
 
-    // 8. INCREMENT REQUEST COUNTER
+    // Increment request counter
     const newRequestCount = user.requests_used_today + 1;
     const newTotalRequests = user.total_requests + 1;
     
@@ -306,7 +333,7 @@ const apiKeyAuth = async (req, res, next) => {
       console.error('Error updating request count:', updateError);
     }
 
-    // 9. LOG API REQUEST
+    // Log API request
     await supabaseAdmin
       .from('api_logs')
       .insert({
@@ -318,7 +345,7 @@ const apiKeyAuth = async (req, res, next) => {
         response_status: 200
       });
 
-    // 10. ATTACH USER TO REQUEST
+    // Attach user to request
     req.apiUser = {
       ...user,
       requests_used_today: newRequestCount,
@@ -343,7 +370,6 @@ const apiKeyAuth = async (req, res, next) => {
 // Home page
 app.get('/', async (req, res) => {
   try {
-    // Get total requests from all users
     const { data: stats } = await supabaseAdmin
       .from('users')
       .select('total_requests');
@@ -365,21 +391,17 @@ app.get('/', async (req, res) => {
 
 // Auth routes
 app.get('/login', async (req, res) => {
-  // Check if already has valid token
   const token = req.cookies.access_token;
   
   if (token) {
     try {
       const { data: { user }, error } = await supabase.auth.getUser(token);
       
-      // If token valid, redirect to dashboard
       if (!error && user) {
         console.log('✅ Already logged in, redirecting to dashboard');
         return res.redirect('/dashboard');
       }
     } catch (error) {
-      // Token invalid, clear it and show login page
-      console.log('⚠️ Invalid token, clearing and showing login');
       res.clearCookie('access_token');
     }
   }
@@ -391,21 +413,17 @@ app.get('/login', async (req, res) => {
 });
 
 app.get('/register', async (req, res) => {
-  // Check if already has valid token
   const token = req.cookies.access_token;
   
   if (token) {
     try {
       const { data: { user }, error } = await supabase.auth.getUser(token);
       
-      // If token valid, redirect to dashboard
       if (!error && user) {
         console.log('✅ Already logged in, redirecting to dashboard');
         return res.redirect('/dashboard');
       }
     } catch (error) {
-      // Token invalid, clear it and show register page
-      console.log('⚠️ Invalid token, clearing and showing register');
       res.clearCookie('access_token');
     }
   }
@@ -418,6 +436,55 @@ app.get('/register', async (req, res) => {
 
 app.get('/verify-email', (req, res) => {
   res.render('verify-email', { title: 'Verify Email - WhatsGate' });
+});
+
+// ==================== CRITICAL FIX: LOGOUT ROUTE ====================
+app.post('/auth/logout', async (req, res) => {
+  try {
+    console.log('🔄 Logout attempt received');
+    
+    // Clear Supabase session
+    const token = req.cookies.access_token;
+    if (token) {
+      await supabase.auth.signOut();
+      console.log('✅ Supabase session cleared');
+    }
+    
+    // Clear all cookies
+    const cookies = ['access_token', 'sb-access-token', 'sb-refresh-token'];
+    cookies.forEach(cookieName => {
+      res.clearCookie(cookieName, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/',
+        domain: isProduction ? '.vercel.app' : undefined
+      });
+    });
+    
+    // Destroy session
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('❌ Session destroy error:', err);
+      }
+    });
+    
+    console.log('✅ Logout successful');
+    
+    res.json({ 
+      success: true, 
+      message: 'Logged out successfully',
+      redirect: '/login'
+    });
+    
+  } catch (error) {
+    console.error('❌ Logout error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Logout failed',
+      message: error.message 
+    });
+  }
 });
 
 // Register endpoint
@@ -464,7 +531,7 @@ app.post('/auth/register', async (req, res) => {
     // Generate API key
     const apiKey = 'wg_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 
-    // Create user record with FREE PLAN (6 requests/day)
+    // Create user record
     const { error: dbError } = await supabaseAdmin
       .from('users')
       .insert({
@@ -526,12 +593,13 @@ app.post('/auth/login', async (req, res) => {
       });
     }
 
+    // Set cookie with proper configuration
     res.cookie('access_token', data.session.access_token, {
       httpOnly: true,
-      secure: true, // ⬅️ ALWAYS true untuk Vercel (HTTPS)
-      sameSite: 'lax', // ⬅️ TAMBAHKAN INI
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000,
-      path: '/' // ⬅️ TAMBAHKAN INI
+      path: '/'
     });
 
     res.json({ success: true, redirectUrl: '/dashboard' });
@@ -541,39 +609,6 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// Logout endpoint
-// Logout endpoint
-app.post('/auth/logout', async (req, res) => {
-    try {
-        const token = req.cookies.access_token;
-        if (token) {
-            await supabase.auth.signOut();
-        }
-        
-        // Clear all auth cookies
-        res.clearCookie('access_token', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'lax',
-            path: '/'
-        });
-        
-        res.clearCookie('sb-access-token', { path: '/' });
-        res.clearCookie('sb-refresh-token', { path: '/' });
-        
-        res.json({ 
-            success: true, 
-            message: 'Logged out successfully' 
-        });
-    } catch (error) {
-        console.error('Logout error:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-});
-/*
 // Dashboard
 app.get('/dashboard', requireAuth, async (req, res) => {
   try {
@@ -611,54 +646,6 @@ app.get('/dashboard', requireAuth, async (req, res) => {
       user: req.user,
       totalRequestsAllUsers,
       recentLogs: recentLogs || []
-    });
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});*/
-
-// Dashboard route - PERBAIKAN
-app.get('/dashboard', requireAuth, async (req, res) => {
-  try {
-    // Get user stats
-    const { data: allUsers } = await supabaseAdmin
-      .from('users')
-      .select('total_requests');
-    
-    const totalRequestsAllUsers = allUsers?.reduce((sum, user) => sum + (user.total_requests || 0), 0) || 0;
-
-    // Reset daily limit if needed
-    const today = new Date().toISOString().split('T')[0];
-    if (req.user.last_reset_date !== today) {
-      await supabaseAdmin
-        .from('users')
-        .update({
-          requests_used_today: 0,
-          last_reset_date: today
-        })
-        .eq('id', req.user.id);
-      
-      req.user.requests_used_today = 0;
-    }
-
-    // Get recent logs
-    const { data: recentLogs } = await supabaseAdmin
-      .from('api_logs')
-      .select('*')
-      .eq('user_id', req.user.id)
-      .order('created_at', { ascending: false })
-      .limit(10);
-
-    // Tentukan currentSection dari URL hash atau default 'overview'
-    const currentSection = 'overview'; // Default section
-
-    res.render('dashboard', {
-      title: 'Dashboard - WhatsGate',
-      user: req.user,
-      totalRequestsAllUsers,
-      recentLogs: recentLogs || [],
-      currentSection: currentSection // TAMBAHKAN INI
     });
   } catch (error) {
     console.error('Dashboard error:', error);
@@ -770,9 +757,7 @@ app.get('/api/stats', requireAuth, async (req, res) => {
   }
 });
 
-// ==================== PROTECTED API ENDPOINTS ====================
-
-// WhatsApp API endpoints (protected with API key)
+// ==================== API ENDPOINTS ====================
 app.get('/api/send', apiKeyAuth, sendHandler);
 app.get('/api/getcode', apiKeyAuth, getcodeHandler);
 
@@ -789,9 +774,18 @@ app.get('/api/check-limit', apiKeyAuth, (req, res) => {
   });
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
-  res.status(404).send('404 - Page Not Found');
+  res.status(404).render('404', { title: '404 - Page Not Found' });
 });
 
 // Error handler
@@ -815,6 +809,7 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
     Status: 🟢 Online
     Port: ${PORT}
     Environment: ${process.env.NODE_ENV || 'development'}
+    Session Config: ${isProduction ? 'Production' : 'Development'}
     ============================================
     `);
   });
