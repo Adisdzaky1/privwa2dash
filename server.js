@@ -214,14 +214,21 @@ const apiKeyAuth = async (req, res, next) => {
 
     console.log('✅ Valid API key for user:', user.username);
 
-    // 4. CHECK IF EMAIL IS VERIFIED
-    const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
-    if (!authUser?.user?.email_confirmed_at) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Please verify your email before using the API',
-        code: 'EMAIL_NOT_VERIFIED'
-      });
+    // 4. CHECK IF EMAIL IS VERIFIED (skip if can't verify)
+    try {
+      const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
+      
+      if (authUser?.user && !authUser.user.email_confirmed_at) {
+        console.log('⚠️ Email not verified for:', user.username);
+        return res.status(403).json({
+          status: 'error',
+          message: 'Please verify your email before using the API',
+          code: 'EMAIL_NOT_VERIFIED'
+        });
+      }
+    } catch (authCheckError) {
+      // If we can't check, log warning but continue
+      console.log('⚠️ Could not verify email status, allowing request:', authCheckError.message);
     }
 
     // 5. CHECK PLAN EXPIRATION
