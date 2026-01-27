@@ -69,35 +69,10 @@
             .sidebar {
                 transform: translateX(0);
                 position: relative;
-                width: 64px;
-                transition: width 0.3s ease;
-            }
-            
-            .sidebar:hover,
-            .sidebar.expanded {
                 width: 280px;
             }
             
-            .sidebar:hover .nav-text,
-            .sidebar.expanded .nav-text {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            
-            .nav-text {
-                opacity: 0;
-                transform: translateX(-10px);
-                transition: all 0.3s ease;
-                white-space: nowrap;
-            }
-            
             .main-content {
-                margin-left: 64px;
-                transition: margin-left 0.3s ease;
-            }
-            
-            .sidebar:hover ~ .main-content,
-            .sidebar.expanded ~ .main-content {
                 margin-left: 280px;
             }
         }
@@ -309,6 +284,22 @@
             border-radius: 4px;
             transition: width 0.5s ease;
         }
+        
+        /* Button Styles */
+        .logout-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3);
+        }
+        
+        .logout-btn:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -348,7 +339,7 @@
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-comments text-white"></i>
                     </div>
-                    <div class="nav-text">
+                    <div>
                         <h1 class="text-xl font-bold text-white whitespace-nowrap">WhatsGate</h1>
                         <p class="text-xs text-gray-400 whitespace-nowrap">API Dashboard</p>
                     </div>
@@ -361,7 +352,7 @@
                     <a href="javascript:void(0);" onclick="showSection('overview')" 
                        class="nav-link active flex items-center px-4 py-3 text-gray-200 hover:text-white">
                         <i class="fas fa-chart-line w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
-                        <div class="nav-text">
+                        <div>
                             <span class="font-medium whitespace-nowrap">Overview</span>
                             <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Dashboard statistics</p>
                         </div>
@@ -370,7 +361,7 @@
                     <a href="javascript:void(0);" onclick="showSection('api')" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
                         <i class="fas fa-code w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
-                        <div class="nav-text">
+                        <div>
                             <span class="font-medium whitespace-nowrap">API Docs</span>
                             <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Integration guide</p>
                         </div>
@@ -379,7 +370,7 @@
                     <a href="javascript:void(0);" onclick="showSection('info')" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
                         <i class="fas fa-info-circle w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
-                        <div class="nav-text">
+                        <div>
                             <span class="font-medium whitespace-nowrap">Information</span>
                             <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Updates & news</p>
                         </div>
@@ -388,7 +379,7 @@
                     <a href="javascript:void(0);" onclick="showSection('upgrade')" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
                         <i class="fas fa-rocket w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
-                        <div class="nav-text">
+                        <div>
                             <span class="font-medium whitespace-nowrap">Upgrade Plan</span>
                             <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Boost your limits</p>
                         </div>
@@ -398,7 +389,7 @@
                     <a href="/admin" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
                         <i class="fas fa-shield-alt w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
-                        <div class="nav-text">
+                        <div>
                             <span class="font-medium whitespace-nowrap">Admin Panel</span>
                             <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">System management</p>
                         </div>
@@ -413,7 +404,7 @@
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
                         <%= user.username.charAt(0).toUpperCase() %>
                     </div>
-                    <div class="ml-3 nav-text">
+                    <div class="ml-3">
                         <p class="font-semibold text-white truncate"><%= user.username %></p>
                         <div class="flex items-center mt-1">
                             <span class="text-xs px-2 py-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 rounded-full">
@@ -423,10 +414,10 @@
                     </div>
                 </div>
                 
-                <button onclick="handleLogout()" 
-                        class="w-full flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-all duration-200">
+                <button id="logoutBtn" 
+                        class="logout-btn w-full flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-medium">
                     <i class="fas fa-sign-out-alt mr-2"></i>
-                    <span class="nav-text whitespace-nowrap">Logout</span>
+                    <span class="whitespace-nowrap">Logout</span>
                 </button>
             </div>
         </div>
@@ -677,119 +668,138 @@
     </div>
     
     <script>
-        // ==================== SIMPLE INITIALIZATION ====================
+        // ==================== INITIALIZATION ====================
         
-        // Hide loading immediately when page loads
-        window.addEventListener('load', function() {
-            console.log('Page loaded');
+        // Hide loading when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
             
-            // Hide loading screen with delay
+            // Hide loading after short delay
             setTimeout(function() {
                 const loading = document.getElementById('loading');
                 if (loading) {
                     loading.classList.add('hidden');
                     setTimeout(function() {
                         loading.style.display = 'none';
+                        console.log('Loading screen hidden');
                     }, 300);
                 }
             }, 500);
             
-            // Setup basic functionality
-            setupDashboard();
+            // Initialize dashboard functionality
+            initializeDashboard();
         });
         
-        function setupDashboard() {
-            console.log('Setting up dashboard...');
+        function initializeDashboard() {
+            console.log('Initializing dashboard...');
             
             try {
-                // Setup mobile menu button
-                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-                if (mobileMenuBtn) {
-                    mobileMenuBtn.addEventListener('click', toggleSidebar);
-                }
+                // Setup all event listeners
+                setupEventListeners();
                 
-                // Setup mobile overlay
-                const mobileOverlay = document.getElementById('mobileOverlay');
-                if (mobileOverlay) {
-                    mobileOverlay.addEventListener('click', toggleSidebar);
-                }
-                
-                // Setup API key toggle
-                const toggleApiKeyBtn = document.getElementById('toggleApiKeyBtn');
-                if (toggleApiKeyBtn) {
-                    toggleApiKeyBtn.addEventListener('click', function() {
-                        const input = document.getElementById('apiKeyInput');
-                        const eyeIcon = document.getElementById('eyeIcon');
-                        const eyeText = document.getElementById('eyeText');
-                        
-                        if (input.type === 'password') {
-                            input.type = 'text';
-                            eyeIcon.className = 'fas fa-eye-slash mr-2';
-                            eyeText.textContent = 'Hide';
-                        } else {
-                            input.type = 'password';
-                            eyeIcon.className = 'fas fa-eye mr-2';
-                            eyeText.textContent = 'Show';
-                        }
-                    });
-                }
-                
-                // Setup API key copy
-                const copyApiKeyBtn = document.getElementById('copyApiKeyBtn');
-                if (copyApiKeyBtn) {
-                    copyApiKeyBtn.addEventListener('click', function() {
-                        const input = document.getElementById('apiKeyInput');
-                        input.select();
-                        input.setSelectionRange(0, 99999);
-                        
-                        try {
-                            navigator.clipboard.writeText(input.value);
-                            showToast('API Key copied to clipboard!', 'success');
-                        } catch (err) {
-                            console.error('Copy failed:', err);
-                            showToast('Failed to copy', 'error');
-                        }
-                    });
-                }
-                
-                // Setup navigation
-                const navLinks = document.querySelectorAll('.nav-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        // Remove active class from all links
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        // Add active class to clicked link
-                        this.classList.add('active');
-                    });
-                });
-                
-                // Setup section switching
+                // Show initial section
                 const hash = window.location.hash.substring(1) || 'overview';
                 showSection(hash);
                 
-                // Setup desktop sidebar hover
-                const sidebar = document.getElementById('sidebar');
-                if (window.innerWidth >= 768 && sidebar) {
-                    sidebar.addEventListener('mouseenter', function() {
-                        this.classList.add('expanded');
-                    });
-                    
-                    sidebar.addEventListener('mouseleave', function() {
-                        this.classList.remove('expanded');
-                    });
-                }
-                
-                console.log('Dashboard setup complete');
+                console.log('Dashboard initialized successfully');
                 
             } catch (error) {
-                console.error('Error in setupDashboard:', error);
+                console.error('Error initializing dashboard:', error);
                 showToast('Error initializing dashboard', 'error');
             }
+        }
+        
+        // ==================== EVENT LISTENERS ====================
+        
+        function setupEventListeners() {
+            console.log('Setting up event listeners...');
+            
+            // Mobile menu button
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', toggleSidebar);
+                console.log('Mobile menu button listener added');
+            }
+            
+            // Mobile overlay
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            if (mobileOverlay) {
+                mobileOverlay.addEventListener('click', toggleSidebar);
+                console.log('Mobile overlay listener added');
+            }
+            
+            // Logout button - FIXED HERE
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                console.log('Logout button found, adding event listener');
+                logoutBtn.addEventListener('click', handleLogout);
+                console.log('Logout button listener added');
+            } else {
+                console.error('Logout button not found!');
+            }
+            
+            // API Key toggle button
+            const toggleApiKeyBtn = document.getElementById('toggleApiKeyBtn');
+            if (toggleApiKeyBtn) {
+                toggleApiKeyBtn.addEventListener('click', function() {
+                    const input = document.getElementById('apiKeyInput');
+                    const eyeIcon = document.getElementById('eyeIcon');
+                    const eyeText = document.getElementById('eyeText');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        eyeIcon.className = 'fas fa-eye-slash mr-2';
+                        eyeText.textContent = 'Hide';
+                    } else {
+                        input.type = 'password';
+                        eyeIcon.className = 'fas fa-eye mr-2';
+                        eyeText.textContent = 'Show';
+                    }
+                });
+                console.log('API Key toggle button listener added');
+            }
+            
+            // API Key copy button
+            const copyApiKeyBtn = document.getElementById('copyApiKeyBtn');
+            if (copyApiKeyBtn) {
+                copyApiKeyBtn.addEventListener('click', function() {
+                    const input = document.getElementById('apiKeyInput');
+                    input.select();
+                    input.setSelectionRange(0, 99999);
+                    
+                    try {
+                        navigator.clipboard.writeText(input.value);
+                        showToast('API Key copied to clipboard!', 'success');
+                    } catch (err) {
+                        console.error('Copy failed:', err);
+                        showToast('Failed to copy', 'error');
+                    }
+                });
+                console.log('API Key copy button listener added');
+            }
+            
+            // Navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                });
+            });
+            console.log('Navigation links listeners added');
+            
+            // Window resize handler
+            window.addEventListener('resize', handleResize);
+            console.log('Window resize listener added');
         }
         
         // ==================== SIDEBAR FUNCTIONS ====================
         
         function toggleSidebar() {
+            console.log('Toggling sidebar');
+            
             try {
                 const sidebar = document.getElementById('sidebar');
                 const overlay = document.getElementById('mobileOverlay');
@@ -806,6 +816,10 @@
                     } else {
                         document.body.style.overflow = '';
                     }
+                    
+                    console.log('Sidebar toggled successfully');
+                } else {
+                    console.error('Sidebar elements not found');
                 }
             } catch (error) {
                 console.error('Error in toggleSidebar:', error);
@@ -832,6 +846,8 @@
         // ==================== SECTION MANAGEMENT ====================
         
         function showSection(section) {
+            console.log('Showing section:', section);
+            
             try {
                 // Hide all sections
                 document.querySelectorAll('main > section').forEach(sec => {
@@ -850,9 +866,96 @@
                     if (window.innerWidth < 768) {
                         closeSidebar();
                     }
+                    
+                    console.log('Section shown successfully');
+                } else {
+                    console.error('Target section not found:', section);
                 }
             } catch (error) {
                 console.error('Error in showSection:', error);
+            }
+        }
+        
+        // ==================== LOGOUT FUNCTION ====================
+        
+        async function handleLogout() {
+            console.log('Logout button clicked!');
+            
+            // First, show confirmation dialog
+            if (!confirm('Are you sure you want to logout?')) {
+                console.log('Logout cancelled by user');
+                return;
+            }
+            
+            console.log('Proceeding with logout...');
+            
+            try {
+                // Show loading screen
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'flex';
+                    loading.style.opacity = '1';
+                    loading.classList.remove('hidden');
+                }
+                
+                console.log('Sending logout request to /auth/logout...');
+                
+                // Send logout request
+                const response = await fetch('/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include' // Important for cookies/session
+                });
+                
+                console.log('Logout response status:', response.status);
+                
+                // Try to parse response as JSON
+                let data;
+                try {
+                    data = await response.json();
+                    console.log('Logout response data:', data);
+                } catch (jsonError) {
+                    console.log('Response is not JSON, treating as plain text');
+                    data = { success: response.ok };
+                }
+                
+                if (data.success || response.ok) {
+                    console.log('Logout successful, redirecting...');
+                    
+                    // Clear any local storage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Redirect to login page
+                    const redirectUrl = data.redirect || '/login';
+                    console.log('Redirecting to:', redirectUrl);
+                    window.location.href = redirectUrl;
+                    
+                } else {
+                    throw new Error(data.error || 'Logout failed with status: ' + response.status);
+                }
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                
+                // Show error toast
+                showToast('Logout failed: ' + error.message, 'error');
+                
+                // Fallback: try direct redirect after 2 seconds
+                setTimeout(() => {
+                    console.log('Fallback redirect to /login');
+                    window.location.href = '/login';
+                }, 2000);
+                
+            } finally {
+                // Hide loading screen
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
             }
         }
         
@@ -903,33 +1006,25 @@
             }
         }
         
-        // ==================== LOGOUT FUNCTION ====================
+        // ==================== UTILITY FUNCTIONS ====================
         
-        function handleLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = '/auth/logout';
-            }
-        }
-        
-        // ==================== WINDOW RESIZE HANDLER ====================
-        
-        window.addEventListener('resize', function() {
+        function handleResize() {
             // Close sidebar on mobile when resizing to desktop
             if (window.innerWidth >= 768) {
                 closeSidebar();
             }
-        });
+        }
         
-        // ==================== EXPORT FUNCTIONS TO GLOBAL SCOPE ====================
+        // ==================== MAKE FUNCTIONS GLOBALLY AVAILABLE ====================
         
+        // Export functions to global scope for inline onclick handlers
         window.toggleSidebar = toggleSidebar;
-        window.closeSidebar = closeSidebar;
         window.showSection = showSection;
+        window.handleLogout = handleLogout;
         window.showToast = showToast;
         window.hideToast = hideToast;
-        window.handleLogout = handleLogout;
         
-        console.log('Dashboard functions ready');
+        console.log('Dashboard functions ready and exported');
     </script>
 </body>
 </html>
