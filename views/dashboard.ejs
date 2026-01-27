@@ -9,7 +9,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -52,6 +51,106 @@
             min-height: 100vh;
         }
         
+        /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                width: 64px;
+                transition: width 0.3s ease;
+            }
+            
+            .sidebar:hover,
+            .sidebar.expanded {
+                width: 280px;
+            }
+            
+            .sidebar:hover .nav-text,
+            .sidebar.expanded .nav-text {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            
+            .nav-text {
+                opacity: 0;
+                transform: translateX(-10px);
+                transition: all 0.3s ease;
+                white-space: nowrap;
+            }
+            
+            .main-content {
+                margin-left: 64px;
+                transition: margin-left 0.3s ease;
+            }
+            
+            .sidebar:hover ~ .main-content,
+            .sidebar.expanded ~ .main-content {
+                margin-left: 280px;
+            }
+        }
+        
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            backdrop-filter: blur(4px);
+        }
+        
+        .mobile-overlay.active {
+            display: block;
+        }
+        
+        /* Sidebar Toggle Animation */
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        
+        /* Nav Link Styles */
+        .nav-link {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-link.active {
+            background: rgba(139, 92, 246, 0.15);
+            border-left: 3px solid #8b5cf6;
+        }
+        
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: #8b5cf6;
+        }
+        
         /* Loading Screen */
         #loading {
             position: fixed;
@@ -68,7 +167,7 @@
             transition: opacity 0.3s ease;
         }
         
-        #loading.fade-out {
+        #loading.hidden {
             opacity: 0;
             pointer-events: none;
         }
@@ -80,80 +179,10 @@
             border-top-color: #8b5cf6;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-        
-        /* Sidebar for Desktop */
-        .sidebar {
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            position: fixed;
-            left: 0;
-            top: 0;
-            height: 100vh;
-            width: 280px;
-            z-index: 40;
-            transform: translateX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none;
-        }
-        
-        /* Mobile Overlay */
-        .mobile-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 35;
-            backdrop-filter: blur(4px);
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .mobile-overlay.active {
-                display: block;
-            }
-            
-            .main-content {
-                margin-left: 0 !important;
-            }
-        }
-        
-        /* Nav Link Styles */
-        .nav-link {
-            transition: all 0.2s ease;
-            border-radius: 8px;
-            position: relative;
-        }
-        
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .nav-link.active {
-            background: rgba(139, 92, 246, 0.2);
-            border-left: 3px solid #8b5cf6;
         }
         
         /* Card Styles */
@@ -170,21 +199,6 @@
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
         
-        /* Progress Bar */
-        .progress-bar {
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981, #3b82f6);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-        
         /* Gradient Card */
         .gradient-card {
             background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
@@ -195,13 +209,72 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 9999;
+            z-index: 1000;
             transform: translateX(150%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
         .toast.show {
             transform: translateX(0);
+        }
+        
+        /* Mobile Menu Button Animation */
+        .mobile-menu-btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .mobile-menu-btn span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: #4b5563;
+            transition: all 0.3s ease;
+            border-radius: 1px;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+        
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 767px) {
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .desktop-only {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-only {
+                display: none !important;
+            }
+            
+            .mobile-menu-btn {
+                display: none;
+            }
         }
         
         /* Scrollbar Styling */
@@ -221,6 +294,21 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a1a1a1;
         }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -228,7 +316,7 @@
     <div id="loading">
         <div class="text-center">
             <div class="loading-spinner"></div>
-            <p class="text-gray-700 font-medium text-lg">Loading Dashboard</p>
+            <p class="text-gray-700 font-medium text-lg mt-4">Loading Dashboard</p>
             <p class="text-gray-500 text-sm mt-2">Please wait...</p>
         </div>
     </div>
@@ -240,7 +328,7 @@
     <div id="toast" class="toast">
         <div class="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 max-w-md">
             <i id="toastIcon" class="fas fa-check-circle text-green-400 text-xl"></i>
-            <div>
+            <div class="flex-1">
                 <p id="toastMessage" class="font-medium">Operation successful</p>
                 <p id="toastDescription" class="text-gray-400 text-sm mt-1"></p>
             </div>
@@ -250,18 +338,19 @@
         </div>
     </div>
     
+    <!-- Desktop/Mobile Container -->
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <div id="sidebar" class="sidebar w-64 md:w-72">
+        <div id="sidebar" class="sidebar">
             <!-- Logo -->
             <div class="p-6 border-b border-gray-800">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-comments text-white"></i>
                     </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-white">WhatsGate</h1>
-                        <p class="text-xs text-gray-400">API Dashboard</p>
+                    <div class="nav-text">
+                        <h1 class="text-xl font-bold text-white whitespace-nowrap">WhatsGate</h1>
+                        <p class="text-xs text-gray-400 whitespace-nowrap">API Dashboard</p>
                     </div>
                 </div>
             </div>
@@ -271,47 +360,47 @@
                 <div class="space-y-1">
                     <a href="javascript:void(0);" onclick="showSection('overview')" 
                        class="nav-link active flex items-center px-4 py-3 text-gray-200 hover:text-white">
-                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
-                        <div class="flex-1">
-                            <span class="font-medium">Overview</span>
-                            <p class="text-xs text-gray-400 mt-1">Dashboard statistics</p>
+                        <i class="fas fa-chart-line w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
+                        <div class="nav-text">
+                            <span class="font-medium whitespace-nowrap">Overview</span>
+                            <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Dashboard statistics</p>
                         </div>
                     </a>
                     
                     <a href="javascript:void(0);" onclick="showSection('api')" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
-                        <i class="fas fa-code w-5 mr-3 text-center"></i>
-                        <div class="flex-1">
-                            <span class="font-medium">API Docs</span>
-                            <p class="text-xs text-gray-400 mt-1">Integration guide</p>
+                        <i class="fas fa-code w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
+                        <div class="nav-text">
+                            <span class="font-medium whitespace-nowrap">API Docs</span>
+                            <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Integration guide</p>
                         </div>
                     </a>
                     
                     <a href="javascript:void(0);" onclick="showSection('info')" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
-                        <i class="fas fa-info-circle w-5 mr-3 text-center"></i>
-                        <div class="flex-1">
-                            <span class="font-medium">Information</span>
-                            <p class="text-xs text-gray-400 mt-1">Updates & news</p>
+                        <i class="fas fa-info-circle w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
+                        <div class="nav-text">
+                            <span class="font-medium whitespace-nowrap">Information</span>
+                            <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Updates & news</p>
                         </div>
                     </a>
                     
                     <a href="javascript:void(0);" onclick="showSection('upgrade')" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
-                        <i class="fas fa-rocket w-5 mr-3 text-center"></i>
-                        <div class="flex-1">
-                            <span class="font-medium">Upgrade Plan</span>
-                            <p class="text-xs text-gray-400 mt-1">Boost your limits</p>
+                        <i class="fas fa-rocket w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
+                        <div class="nav-text">
+                            <span class="font-medium whitespace-nowrap">Upgrade Plan</span>
+                            <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">Boost your limits</p>
                         </div>
                     </a>
                     
                     <% if (user.role === 'admin') { %>
                     <a href="/admin" 
                        class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
-                        <i class="fas fa-shield-alt w-5 mr-3 text-center"></i>
-                        <div class="flex-1">
-                            <span class="font-medium">Admin Panel</span>
-                            <p class="text-xs text-gray-400 mt-1">System management</p>
+                        <i class="fas fa-shield-alt w-5 h-5 flex-shrink-0 mr-3 text-center"></i>
+                        <div class="nav-text">
+                            <span class="font-medium whitespace-nowrap">Admin Panel</span>
+                            <p class="text-xs text-gray-400 mt-1 whitespace-nowrap">System management</p>
                         </div>
                     </a>
                     <% } %>
@@ -321,13 +410,13 @@
             <!-- User Profile -->
             <div class="p-4 border-t border-gray-800">
                 <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
                         <%= user.username.charAt(0).toUpperCase() %>
                     </div>
-                    <div class="ml-3 flex-1">
-                        <p class="font-semibold text-white"><%= user.username %></p>
+                    <div class="ml-3 nav-text">
+                        <p class="font-semibold text-white truncate"><%= user.username %></p>
                         <div class="flex items-center mt-1">
-                            <span class="text-xs px-2 py-1 bg-purple-600/20 text-purple-300 rounded-full">
+                            <span class="text-xs px-2 py-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 rounded-full">
                                 <%= user.plan.toUpperCase() %> PLAN
                             </span>
                         </div>
@@ -337,31 +426,37 @@
                 <button onclick="handleLogout()" 
                         class="w-full flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-all duration-200">
                     <i class="fas fa-sign-out-alt mr-2"></i>
-                    Logout
+                    <span class="nav-text whitespace-nowrap">Logout</span>
                 </button>
             </div>
         </div>
         
         <!-- Main Content -->
-        <div id="mainContent" class="flex-1 flex flex-col main-content md:ml-64 lg:ml-72">
+        <div id="mainContent" class="main-content flex-1 flex flex-col">
             <!-- Header -->
-            <header class="bg-white shadow-sm border-b sticky top-0 z-30">
-                <div class="px-4 sm:px-6 py-4">
+            <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+                <div class="px-4 sm:px-6 py-3">
                     <div class="flex items-center justify-between">
+                        <!-- Left side: Mobile menu button and title -->
                         <div class="flex items-center space-x-4">
-                            <button onclick="toggleSidebar()" 
-                                    class="mobile-menu-btn text-gray-700 hover:text-primary-700 p-2 rounded-lg hover:bg-gray-100">
-                                <i class="fas fa-bars text-xl"></i>
+                            <!-- Mobile Menu Button (Hamburger) -->
+                            <button id="mobileMenuBtn" class="mobile-menu-btn" onclick="toggleSidebar()">
+                                <span></span>
+                                <span></span>
+                                <span></span>
                             </button>
+                            
                             <div>
-                                <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
-                                <p class="text-sm text-gray-600">Welcome back, <%= user.username %>!</p>
+                                <h1 class="text-lg sm:text-xl font-bold text-gray-900">Dashboard</h1>
+                                <p class="text-xs sm:text-sm text-gray-600">Welcome back, <%= user.username %>!</p>
                             </div>
                         </div>
                         
-                        <div class="flex items-center space-x-3">
-                            <div class="hidden sm:block px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium">
-                                Limit: <%= user.requests_used_today %>/<%= user.daily_limit %>
+                        <!-- Right side: Actions -->
+                        <div class="flex items-center space-x-2 sm:space-x-3">
+                            <div class="hidden sm:flex items-center px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium">
+                                <i class="fas fa-fire mr-2"></i>
+                                <span>Limit: <%= user.requests_used_today %>/<%= user.daily_limit %></span>
                             </div>
                             <a href="https://t.me/yourtelegram" target="_blank" 
                                class="flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-200">
@@ -556,28 +651,25 @@
                     </div>
                 </section>
                 
-                <!-- Other sections (API, Info, Upgrade) remain the same -->
-                <!-- API Documentation Section -->
+                <!-- Other sections remain the same -->
                 <section id="api-section" class="space-y-6 hidden">
                     <div class="card p-5 sm:p-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">API Documentation</h2>
-                        <!-- Content same as before -->
+                        <!-- API docs content -->
                     </div>
                 </section>
                 
-                <!-- Information Section -->
                 <section id="info-section" class="space-y-6 hidden">
                     <div class="card p-5 sm:p-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">Information</h2>
-                        <!-- Content same as before -->
+                        <!-- Info content -->
                     </div>
                 </section>
                 
-                <!-- Upgrade Plan Section -->
                 <section id="upgrade-section" class="space-y-6 hidden">
                     <div class="card p-5 sm:p-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">Upgrade Plan</h2>
-                        <!-- Content same as before -->
+                        <!-- Upgrade content -->
                     </div>
                 </section>
             </main>
@@ -587,212 +679,257 @@
     <script>
         // ==================== SIMPLE INITIALIZATION ====================
         
-        // Hide loading immediately when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded');
+        // Hide loading immediately when page loads
+        window.addEventListener('load', function() {
+            console.log('Page loaded');
             
-            // Initialize immediately
+            // Hide loading screen with delay
             setTimeout(function() {
-                try {
-                    // Hide loading
-                    const loading = document.getElementById('loading');
-                    loading.classList.add('fade-out');
-                    
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.classList.add('hidden');
                     setTimeout(function() {
                         loading.style.display = 'none';
-                        console.log('Loading hidden');
                     }, 300);
-                    
-                    // Setup basic event listeners
-                    setupBasicListeners();
-                    
-                    // Show initial section
-                    const hash = window.location.hash.substring(1) || 'overview';
-                    showSection(hash);
-                    
-                } catch (error) {
-                    console.error('Initialization error:', error);
-                    // Force hide loading even on error
-                    document.getElementById('loading').style.display = 'none';
                 }
-            }, 500); // 500ms delay to ensure everything is ready
+            }, 500);
+            
+            // Setup basic functionality
+            setupDashboard();
         });
         
-        function setupBasicListeners() {
-            console.log('Setting up basic listeners');
+        function setupDashboard() {
+            console.log('Setting up dashboard...');
             
-            // Sidebar toggle for mobile
-            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', toggleSidebar);
-            }
-            
-            // Mobile overlay
-            const mobileOverlay = document.getElementById('mobileOverlay');
-            if (mobileOverlay) {
-                mobileOverlay.addEventListener('click', toggleSidebar);
-            }
-            
-            // API Key toggle
-            const toggleBtn = document.getElementById('toggleApiKeyBtn');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function() {
-                    const input = document.getElementById('apiKeyInput');
-                    const eyeIcon = document.getElementById('eyeIcon');
-                    const eyeText = document.getElementById('eyeText');
+            try {
+                // Setup mobile menu button
+                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.addEventListener('click', toggleSidebar);
+                }
+                
+                // Setup mobile overlay
+                const mobileOverlay = document.getElementById('mobileOverlay');
+                if (mobileOverlay) {
+                    mobileOverlay.addEventListener('click', toggleSidebar);
+                }
+                
+                // Setup API key toggle
+                const toggleApiKeyBtn = document.getElementById('toggleApiKeyBtn');
+                if (toggleApiKeyBtn) {
+                    toggleApiKeyBtn.addEventListener('click', function() {
+                        const input = document.getElementById('apiKeyInput');
+                        const eyeIcon = document.getElementById('eyeIcon');
+                        const eyeText = document.getElementById('eyeText');
+                        
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            eyeIcon.className = 'fas fa-eye-slash mr-2';
+                            eyeText.textContent = 'Hide';
+                        } else {
+                            input.type = 'password';
+                            eyeIcon.className = 'fas fa-eye mr-2';
+                            eyeText.textContent = 'Show';
+                        }
+                    });
+                }
+                
+                // Setup API key copy
+                const copyApiKeyBtn = document.getElementById('copyApiKeyBtn');
+                if (copyApiKeyBtn) {
+                    copyApiKeyBtn.addEventListener('click', function() {
+                        const input = document.getElementById('apiKeyInput');
+                        input.select();
+                        input.setSelectionRange(0, 99999);
+                        
+                        try {
+                            navigator.clipboard.writeText(input.value);
+                            showToast('API Key copied to clipboard!', 'success');
+                        } catch (err) {
+                            console.error('Copy failed:', err);
+                            showToast('Failed to copy', 'error');
+                        }
+                    });
+                }
+                
+                // Setup navigation
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        // Remove active class from all links
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        // Add active class to clicked link
+                        this.classList.add('active');
+                    });
+                });
+                
+                // Setup section switching
+                const hash = window.location.hash.substring(1) || 'overview';
+                showSection(hash);
+                
+                // Setup desktop sidebar hover
+                const sidebar = document.getElementById('sidebar');
+                if (window.innerWidth >= 768 && sidebar) {
+                    sidebar.addEventListener('mouseenter', function() {
+                        this.classList.add('expanded');
+                    });
                     
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        eyeIcon.className = 'fas fa-eye-slash mr-2';
-                        eyeText.textContent = 'Hide';
-                    } else {
-                        input.type = 'password';
-                        eyeIcon.className = 'fas fa-eye mr-2';
-                        eyeText.textContent = 'Show';
-                    }
-                });
+                    sidebar.addEventListener('mouseleave', function() {
+                        this.classList.remove('expanded');
+                    });
+                }
+                
+                console.log('Dashboard setup complete');
+                
+            } catch (error) {
+                console.error('Error in setupDashboard:', error);
+                showToast('Error initializing dashboard', 'error');
             }
-            
-            // API Key copy
-            const copyBtn = document.getElementById('copyApiKeyBtn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', function() {
-                    const input = document.getElementById('apiKeyInput');
-                    input.select();
-                    input.setSelectionRange(0, 99999);
-                    
-                    try {
-                        navigator.clipboard.writeText(input.value);
-                        showToast('API Key copied to clipboard!', 'success');
-                    } catch (err) {
-                        console.error('Copy failed:', err);
-                        showToast('Failed to copy', 'error');
-                    }
-                });
-            }
-            
-            // Navigation links
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Remove active class from all links
-                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                    // Add active class to clicked link
-                    this.classList.add('active');
-                });
-            });
-            
-            // Logout button
-            const logoutBtns = document.querySelectorAll('button[onclick*="handleLogout"]');
-            logoutBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (confirm('Are you sure you want to logout?')) {
-                        window.location.href = '/auth/logout';
-                    }
-                });
-            });
         }
         
-        // ==================== BASIC FUNCTIONS ====================
+        // ==================== SIDEBAR FUNCTIONS ====================
         
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
-            
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Prevent body scroll when sidebar is open
-            if (sidebar.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobileOverlay');
+                const menuBtn = document.getElementById('mobileMenuBtn');
+                
+                if (sidebar && overlay && menuBtn) {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    menuBtn.classList.toggle('active');
+                    
+                    // Prevent body scroll when sidebar is open on mobile
+                    if (sidebar.classList.contains('active')) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error in toggleSidebar:', error);
             }
         }
+        
+        function closeSidebar() {
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobileOverlay');
+                const menuBtn = document.getElementById('mobileMenuBtn');
+                
+                if (sidebar && overlay && menuBtn) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    menuBtn.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            } catch (error) {
+                console.error('Error in closeSidebar:', error);
+            }
+        }
+        
+        // ==================== SECTION MANAGEMENT ====================
         
         function showSection(section) {
-            console.log('Showing section:', section);
-            
-            // Hide all sections
-            document.querySelectorAll('main > section').forEach(sec => {
-                sec.classList.add('hidden');
-            });
-            
-            // Show selected section
-            const targetSection = document.getElementById(section + '-section');
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-            }
-            
-            // Close sidebar on mobile
-            if (window.innerWidth < 768) {
-                toggleSidebar();
+            try {
+                // Hide all sections
+                document.querySelectorAll('main > section').forEach(sec => {
+                    sec.classList.add('hidden');
+                });
+                
+                // Show selected section
+                const targetSection = document.getElementById(section + '-section');
+                if (targetSection) {
+                    targetSection.classList.remove('hidden');
+                    
+                    // Update URL hash
+                    history.replaceState(null, null, '#' + section);
+                    
+                    // Close sidebar on mobile
+                    if (window.innerWidth < 768) {
+                        closeSidebar();
+                    }
+                }
+            } catch (error) {
+                console.error('Error in showSection:', error);
             }
         }
         
+        // ==================== TOAST NOTIFICATION ====================
+        
         function showToast(message, type) {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            // Set message and icon
-            toastMessage.textContent = message;
-            
-            switch(type) {
-                case 'success':
-                    toastIcon.className = 'fas fa-check-circle text-green-400 text-xl';
-                    break;
-                case 'error':
-                    toastIcon.className = 'fas fa-exclamation-circle text-red-400 text-xl';
-                    break;
-                case 'warning':
-                    toastIcon.className = 'fas fa-exclamation-triangle text-yellow-400 text-xl';
-                    break;
-                default:
-                    toastIcon.className = 'fas fa-info-circle text-blue-400 text-xl';
+            try {
+                const toast = document.getElementById('toast');
+                const toastIcon = document.getElementById('toastIcon');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                if (toast && toastIcon && toastMessage) {
+                    // Set message
+                    toastMessage.textContent = message;
+                    
+                    // Set icon based on type
+                    switch(type) {
+                        case 'success':
+                            toastIcon.className = 'fas fa-check-circle text-green-400 text-xl';
+                            break;
+                        case 'error':
+                            toastIcon.className = 'fas fa-exclamation-circle text-red-400 text-xl';
+                            break;
+                        case 'warning':
+                            toastIcon.className = 'fas fa-exclamation-triangle text-yellow-400 text-xl';
+                            break;
+                        default:
+                            toastIcon.className = 'fas fa-info-circle text-blue-400 text-xl';
+                    }
+                    
+                    // Show toast
+                    toast.classList.add('show');
+                    
+                    // Hide after 3 seconds
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error in showToast:', error);
             }
-            
-            // Show toast
-            toast.classList.add('show');
-            
-            // Hide after 3 seconds
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 3000);
         }
         
         function hideToast() {
             const toast = document.getElementById('toast');
-            toast.classList.remove('show');
+            if (toast) {
+                toast.classList.remove('show');
+            }
         }
         
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                // Close sidebar and reset body overflow on desktop
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('mobileOverlay');
-                
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        });
+        // ==================== LOGOUT FUNCTION ====================
         
-        // Make functions available globally
-        window.toggleSidebar = toggleSidebar;
-        window.showSection = showSection;
-        window.showToast = showToast;
-        window.hideToast = hideToast;
-        
-        // Simple logout handler
-        window.handleLogout = function() {
+        function handleLogout() {
             if (confirm('Are you sure you want to logout?')) {
                 window.location.href = '/auth/logout';
             }
-        };
+        }
         
-        console.log('Dashboard initialized successfully');
+        // ==================== WINDOW RESIZE HANDLER ====================
+        
+        window.addEventListener('resize', function() {
+            // Close sidebar on mobile when resizing to desktop
+            if (window.innerWidth >= 768) {
+                closeSidebar();
+            }
+        });
+        
+        // ==================== EXPORT FUNCTIONS TO GLOBAL SCOPE ====================
+        
+        window.toggleSidebar = toggleSidebar;
+        window.closeSidebar = closeSidebar;
+        window.showSection = showSection;
+        window.showToast = showToast;
+        window.hideToast = hideToast;
+        window.handleLogout = handleLogout;
+        
+        console.log('Dashboard functions ready');
     </script>
 </body>
 </html>
