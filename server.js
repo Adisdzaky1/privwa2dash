@@ -90,9 +90,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true, // ⬅️ ALWAYS true untuk HTTPS (Vercel)
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
+    sameSite: 'lax', // ⬅️ TAMBAHKAN INI
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/' // ⬅️ TAMBAHKAN INI
   }
 }));
 
@@ -109,33 +111,41 @@ const requireAuth = async (req, res, next) => {
   try {
     const token = req.cookies.access_token || req.headers.authorization?.replace('Bearer ', '');
     
+    // If no token, redirect to login
     if (!token) {
+      console.log('❌ No token found, redirecting to login');
       return res.redirect('/login');
     }
 
+    // Verify token with Supabase
     const { data: { user }, error } = await supabase.auth.getUser(token);
     
     if (error || !user) {
+      console.log('❌ Invalid token:', error?.message);
       res.clearCookie('access_token');
       return res.redirect('/login');
     }
 
     // Get user data from database
-    const { data: userData } = await supabase
+    const { data: userData, error: dbError } = await supabase
       .from('users')
       .select('*')
       .eq('id', user.id)
       .single();
 
-    if (!userData) {
+    if (dbError || !userData) {
+      console.log('❌ User not found in database:', dbError?.message);
+      res.clearCookie('access_token');
       return res.redirect('/login');
     }
 
+    console.log('✅ Auth success:', userData.username);
     req.user = userData;
     req.supabaseUser = user;
     next();
   } catch (error) {
-    console.error('Auth error:', error);
+    console.error('❌ Auth middleware error:', error);
+    res.clearCookie('access_token');
     res.redirect('/login');
   }
 };
@@ -333,23 +343,55 @@ app.get('/', async (req, res) => {
 });
 
 // Auth routes
-app.get('/login', (req, res) => {
-  if (req.cookies.access_token) {
-    return res.redirect('/dashboard');
+app.get('/login', async (req, res) => {
+  // Check if already has valid token
+  const token = req.cookies.access_token;
+  
+  if (token) {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      // If token valid, redirect to dashboard
+      if (!error && user) {
+        console.log('✅ Already logged in, redirecting to dashboard');
+        return res.redirect('/dashboard');
+      }
+    } catch (error) {
+      // Token invalid, clear it and show login page
+      console.log('⚠️ Invalid token, clearing and showing login');
+      res.clearCookie('access_token');
+    }
   }
+  
   res.render('login', { 
     title: 'Login - WhatsGate',
-    recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '6LeKVFcsAAAAAJHzMDeHCGCKXzNDi1uGMwGhW6C7'
+    recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '6LdPSlEsAAAAADG81kKvOHpuA-sT4p7mQWaB8tML'
   });
 });
 
-app.get('/register', (req, res) => {
-  if (req.cookies.access_token) {
-    return res.redirect('/dashboard');
+app.get('/register', async (req, res) => {
+  // Check if already has valid token
+  const token = req.cookies.access_token;
+  
+  if (token) {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      // If token valid, redirect to dashboard
+      if (!error && user) {
+        console.log('✅ Already logged in, redirecting to dashboard');
+        return res.redirect('/dashboard');
+      }
+    } catch (error) {
+      // Token invalid, clear it and show register page
+      console.log('⚠️ Invalid token, clearing and showing register');
+      res.clearCookie('access_token');
+    }
   }
+  
   res.render('register', { 
     title: 'Register - WhatsGate',
-    recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '6LeKVFcsAAAAAJHzMDeHCGCKXzNDi1uGMwGhW6C7'
+    recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '6LdPSlEsAAAAADG81kKvOHpuA-sT4p7mQWaB8tML'
   });
 });
 
@@ -364,7 +406,7 @@ app.post('/auth/register', async (req, res) => {
 
     // Verify reCAPTCHA
     const recaptchaResponse = req.body['g-recaptcha-response'];
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LeKVFcsAAAAAPOiAdmhInWwo_nWMDFK6Nw-Pn_J';
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LdPSlEsAAAAAJ8MIoT8bXxa4NZk33rgNZB7zbd4';
     
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
     const recaptchaResult = await axios.post(verifyUrl);
@@ -440,7 +482,7 @@ app.post('/auth/login', async (req, res) => {
 
     // Verify reCAPTCHA
     const recaptchaResponse = req.body['g-recaptcha-response'];
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LeKVFcsAAAAAPOiAdmhInWwo_nWMDFK6Nw-Pn_J';
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LdPSlEsAAAAAJ8MIoT8bXxa4NZk33rgNZB7zbd4';
     
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
     const recaptchaResult = await axios.post(verifyUrl);
@@ -465,8 +507,10 @@ app.post('/auth/login', async (req, res) => {
 
     res.cookie('access_token', data.session.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000
+      secure: true, // ⬅️ ALWAYS true untuk Vercel (HTTPS)
+      sameSite: 'lax', // ⬅️ TAMBAHKAN INI
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/' // ⬅️ TAMBAHKAN INI
     });
 
     res.json({ success: true, redirectUrl: '/dashboard' });
