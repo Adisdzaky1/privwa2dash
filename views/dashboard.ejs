@@ -9,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -36,7 +37,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -46,7 +47,13 @@
             font-family: 'Inter', sans-serif;
         }
         
-        .loading-screen {
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+        
+        /* Loading Screen */
+        #loading {
             position: fixed;
             top: 0;
             left: 0;
@@ -55,460 +62,737 @@
             background: white;
             z-index: 9999;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             transition: opacity 0.3s ease;
         }
         
-        .loading-hidden {
+        #loading.fade-out {
             opacity: 0;
             pointer-events: none;
         }
         
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Sidebar for Desktop */
         .sidebar {
-            transform: translateX(-100%);
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 280px;
+            z-index: 40;
+            transform: translateX(0);
             transition: transform 0.3s ease;
         }
         
-        .sidebar-open {
-            transform: translateX(0);
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
         }
         
-        @media (min-width: 768px) {
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 35;
+            backdrop-filter: blur(4px);
+        }
+        
+        @media (max-width: 768px) {
             .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
                 transform: translateX(0);
             }
             
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .mobile-overlay.active {
+                display: block;
+            }
+            
             .main-content {
-                margin-left: 16rem;
+                margin-left: 0 !important;
             }
         }
         
-        .nav-item.active {
-            background: rgba(139, 92, 246, 0.1);
+        /* Nav Link Styles */
+        .nav-link {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link.active {
+            background: rgba(139, 92, 246, 0.2);
             border-left: 3px solid #8b5cf6;
         }
         
-        .stats-card {
-            transition: all 0.3s ease;
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
         }
         
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Gradient Card */
+        .gradient-card {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Simple Loading Screen -->
-    <div id="loading" class="loading-screen">
+    <!-- Loading Screen -->
+    <div id="loading">
         <div class="text-center">
-            <div class="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-gray-700 font-medium">Loading dashboard...</p>
+            <div class="loading-spinner"></div>
+            <p class="text-gray-700 font-medium text-lg">Loading Dashboard</p>
+            <p class="text-gray-500 text-sm mt-2">Please wait...</p>
         </div>
     </div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closeSidebar()"></div>
-
-    <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-gray-900 text-white z-50">
-        <!-- Logo -->
-        <div class="p-6 border-b border-gray-800">
-            <div class="flex items-center">
-                <div class="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center mr-3">
-                    <i class="fas fa-comments text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold">WhatsGate</h1>
-                    <p class="text-xs text-gray-400">API Dashboard</p>
-                </div>
+    
+    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="mobile-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 max-w-md">
+            <i id="toastIcon" class="fas fa-check-circle text-green-400 text-xl"></i>
+            <div>
+                <p id="toastMessage" class="font-medium">Operation successful</p>
+                <p id="toastDescription" class="text-gray-400 text-sm mt-1"></p>
             </div>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="p-4 space-y-2">
-            <a href="#overview" class="nav-item active flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
-                <i class="fas fa-chart-pie w-5 mr-3"></i>
-                <div>
-                    <span class="font-medium">Overview</span>
-                    <p class="text-xs text-gray-400">Dashboard statistics</p>
-                </div>
-            </a>
-            
-            <a href="#api" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
-                <i class="fas fa-code w-5 mr-3"></i>
-                <div>
-                    <span class="font-medium">API Docs</span>
-                    <p class="text-xs text-gray-400">Integration guide</p>
-                </div>
-            </a>
-            
-            <a href="#info" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
-                <i class="fas fa-info-circle w-5 mr-3"></i>
-                <div>
-                    <span class="font-medium">Information</span>
-                    <p class="text-xs text-gray-400">Updates & news</p>
-                </div>
-            </a>
-            
-            <a href="#upgrade" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
-                <i class="fas fa-rocket w-5 mr-3"></i>
-                <div>
-                    <span class="font-medium">Upgrade Plan</span>
-                    <p class="text-xs text-gray-400">Boost your limits</p>
-                </div>
-            </a>
-            
-            <% if (user.role === 'admin') { %>
-            <a href="/admin" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-200 hover:bg-gray-800">
-                <i class="fas fa-shield-alt w-5 mr-3"></i>
-                <div>
-                    <span class="font-medium">Admin Panel</span>
-                    <p class="text-xs text-gray-400">System management</p>
-                </div>
-            </a>
-            <% } %>
-        </nav>
-
-        <!-- User Profile -->
-        <div class="p-4 border-t border-gray-800 mt-auto">
-            <div class="flex items-center mb-4">
-                <div class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold mr-3">
-                    <%= user.username.charAt(0).toUpperCase() %>
-                </div>
-                <div>
-                    <p class="font-medium"><%= user.username %></p>
-                    <span class="text-xs bg-primary-900 text-primary-300 px-2 py-1 rounded">
-                        <%= user.plan.toUpperCase() %> PLAN
-                    </span>
-                </div>
-            </div>
-            
-            <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium">
-                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            <button onclick="hideToast()" class="text-gray-400 hover:text-white ml-4">
+                <i class="fas fa-times"></i>
             </button>
         </div>
-    </aside>
-
-    <!-- Main Content -->
-    <div id="mainContent" class="main-content">
-        <!-- Header -->
-        <header class="bg-white border-b shadow-sm">
-            <div class="px-4 sm:px-6 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <button onclick="toggleSidebar()" class="md:hidden text-gray-700 mr-4">
-                            <i class="fas fa-bars text-xl"></i>
-                        </button>
-                        <div>
-                            <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
-                            <p class="text-sm text-gray-600">Welcome, <%= user.username %></p>
-                        </div>
+    </div>
+    
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar w-64 md:w-72">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                        <i class="fas fa-comments text-white"></i>
                     </div>
-                    
-                    <div class="flex items-center space-x-2">
-                        <div class="bg-primary-500 text-white px-4 py-2 rounded-lg font-medium">
-                            <i class="fas fa-fire mr-2"></i>
-                            <%= user.requests_used_today %>/<%= user.daily_limit %>
-                        </div>
-                        <a href="https://t.me/yourtelegram" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
-                            <i class="fab fa-telegram-plane mr-2"></i>Support
-                        </a>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">WhatsGate</h1>
+                        <p class="text-xs text-gray-400">API Dashboard</p>
                     </div>
                 </div>
             </div>
-        </header>
-
-        <!-- Content -->
-        <main class="p-4 sm:p-6">
-            <!-- Overview Section (Default Visible) -->
-            <section id="overview-section" class="space-y-6">
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="stats-card bg-white p-6 rounded-xl shadow">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 rounded-lg bg-primary-50 mr-4">
-                                <i class="fas fa-globe text-primary-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-gray-900"><%= totalRequestsAllUsers.toLocaleString() %></p>
-                                <p class="text-sm text-gray-500">Total requests</p>
-                            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 p-4">
+                <div class="space-y-1">
+                    <a href="javascript:void(0);" onclick="showSection('overview')" 
+                       class="nav-link active flex items-center px-4 py-3 text-gray-200 hover:text-white">
+                        <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
+                        <div class="flex-1">
+                            <span class="font-medium">Overview</span>
+                            <p class="text-xs text-gray-400 mt-1">Dashboard statistics</p>
                         </div>
-                    </div>
+                    </a>
                     
-                    <div class="stats-card bg-white p-6 rounded-xl shadow">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 rounded-lg bg-blue-50 mr-4">
-                                <i class="fas fa-chart-bar text-blue-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-gray-900"><%= user.total_requests.toLocaleString() %></p>
-                                <p class="text-sm text-gray-500">Your requests</p>
-                            </div>
+                    <a href="javascript:void(0);" onclick="showSection('api')" 
+                       class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
+                        <i class="fas fa-code w-5 mr-3 text-center"></i>
+                        <div class="flex-1">
+                            <span class="font-medium">API Docs</span>
+                            <p class="text-xs text-gray-400 mt-1">Integration guide</p>
                         </div>
-                    </div>
+                    </a>
                     
-                    <div class="stats-card bg-white p-6 rounded-xl shadow">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 rounded-lg bg-green-50 mr-4">
-                                <i class="fas fa-calendar-day text-green-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-gray-900"><%= user.requests_used_today %>/<%= user.daily_limit %></p>
-                                <p class="text-sm text-gray-500">Today's usage</p>
-                            </div>
+                    <a href="javascript:void(0);" onclick="showSection('info')" 
+                       class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
+                        <i class="fas fa-info-circle w-5 mr-3 text-center"></i>
+                        <div class="flex-1">
+                            <span class="font-medium">Information</span>
+                            <p class="text-xs text-gray-400 mt-1">Updates & news</p>
                         </div>
-                        <div class="mt-4">
-                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-green-500 rounded-full" style="width: <%= (user.requests_used_today / user.daily_limit * 100) %>%"></div>
-                            </div>
-                        </div>
-                    </div>
+                    </a>
                     
-                    <div class="stats-card bg-white p-6 rounded-xl shadow">
-                        <div class="flex items-center mb-4">
-                            <div class="p-3 rounded-lg bg-yellow-50 mr-4">
-                                <i class="fas fa-crown text-yellow-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-2xl font-bold text-gray-900 uppercase"><%= user.plan %></p>
-                                <p class="text-sm text-gray-500">Current plan</p>
-                            </div>
+                    <a href="javascript:void(0);" onclick="showSection('upgrade')" 
+                       class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
+                        <i class="fas fa-rocket w-5 mr-3 text-center"></i>
+                        <div class="flex-1">
+                            <span class="font-medium">Upgrade Plan</span>
+                            <p class="text-xs text-gray-400 mt-1">Boost your limits</p>
+                        </div>
+                    </a>
+                    
+                    <% if (user.role === 'admin') { %>
+                    <a href="/admin" 
+                       class="nav-link flex items-center px-4 py-3 text-gray-200 hover:text-white">
+                        <i class="fas fa-shield-alt w-5 mr-3 text-center"></i>
+                        <div class="flex-1">
+                            <span class="font-medium">Admin Panel</span>
+                            <p class="text-xs text-gray-400 mt-1">System management</p>
+                        </div>
+                    </a>
+                    <% } %>
+                </div>
+            </nav>
+            
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-800">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                        <%= user.username.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="font-semibold text-white"><%= user.username %></p>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs px-2 py-1 bg-purple-600/20 text-purple-300 rounded-full">
+                                <%= user.plan.toUpperCase() %> PLAN
+                            </span>
                         </div>
                     </div>
                 </div>
-
-                <!-- API Key Section -->
-                <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-6 rounded-xl">
-                    <div class="mb-4">
-                        <h3 class="text-xl font-bold mb-2">Your API Key</h3>
-                        <p class="text-primary-100">Keep this key secret</p>
-                    </div>
-                    
-                    <div class="relative mb-4">
-                        <input type="password" 
-                               id="apiKey" 
-                               value="<%= user.api_key %>" 
-                               readonly
-                               class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white font-mono">
-                        <button onclick="toggleApiKey()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white">
-                            <i id="eyeIcon" class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="flex space-x-2">
-                        <button onclick="copyApiKey()" class="bg-white text-primary-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-100">
-                            <i class="fas fa-copy mr-2"></i>Copy Key
-                        </button>
-                        <button onclick="toggleApiKey()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium">
-                            <span id="toggleText">Show Key</span>
-                        </button>
+                
+                <button onclick="handleLogout()" 
+                        class="w-full flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium transition-all duration-200">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div id="mainContent" class="flex-1 flex flex-col main-content md:ml-64 lg:ml-72">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b sticky top-0 z-30">
+                <div class="px-4 sm:px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="toggleSidebar()" 
+                                    class="mobile-menu-btn text-gray-700 hover:text-primary-700 p-2 rounded-lg hover:bg-gray-100">
+                                <i class="fas fa-bars text-xl"></i>
+                            </button>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+                                <p class="text-sm text-gray-600">Welcome back, <%= user.username %>!</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <div class="hidden sm:block px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium">
+                                Limit: <%= user.requests_used_today %>/<%= user.daily_limit %>
+                            </div>
+                            <a href="https://t.me/yourtelegram" target="_blank" 
+                               class="flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-200">
+                                <i class="fab fa-telegram-plane mr-2"></i>
+                                <span class="hidden sm:inline">Support</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-xl shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b">
-                        <h3 class="text-lg font-bold text-gray-900">Recent Activity</h3>
+            </header>
+            
+            <!-- Content Area -->
+            <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
+                <!-- Overview Section -->
+                <section id="overview-section" class="space-y-6">
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        <!-- Total Requests All Users -->
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-lg bg-purple-50">
+                                    <i class="fas fa-globe text-purple-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-500">Global Total</span>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900" id="totalRequestsAll">
+                                <%= totalRequestsAllUsers.toLocaleString() %>
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">All requests across all users</p>
+                        </div>
+                        
+                        <!-- Your Total Requests -->
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-lg bg-blue-50">
+                                    <i class="fas fa-chart-bar text-blue-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-500">Your Total</span>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">
+                                <%= user.total_requests.toLocaleString() %>
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">Your lifetime requests</p>
+                        </div>
+                        
+                        <!-- Today's Usage -->
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-lg bg-green-50">
+                                    <i class="fas fa-calendar-day text-green-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-500">Today's Usage</span>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">
+                                <%= user.requests_used_today %>/<%= user.daily_limit %>
+                            </p>
+                            <div class="mt-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                    <span>Usage</span>
+                                    <span><%= Math.round((user.requests_used_today / user.daily_limit) * 100) %>%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: <%= Math.min((user.requests_used_today / user.daily_limit) * 100, 100) %>%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Current Plan -->
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 rounded-lg bg-yellow-50">
+                                    <i class="fas fa-crown text-yellow-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-500">Current Plan</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-2xl font-bold text-gray-900 uppercase">
+                                    <%= user.plan %>
+                                </p>
+                                <% if (user.plan !== 'free') { %>
+                                <span class="px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold rounded-full">
+                                    ACTIVE
+                                </span>
+                                <% } %>
+                            </div>
+                            <% if (user.plan_expires_at) { %>
+                            <p class="text-sm text-gray-500 mt-2">
+                                <i class="far fa-clock mr-1"></i>
+                                Expires: <%= new Date(user.plan_expires_at).toLocaleDateString() %>
+                            </p>
+                            <% } %>
+                        </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Endpoint</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <% if (recentLogs.length === 0) { %>
-                                <tr>
-                                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                                        No activity yet
-                                    </td>
-                                </tr>
-                                <% } else { %>
-                                    <% recentLogs.forEach(log => { %>
+                    
+                    <!-- API Key Card -->
+                    <div class="gradient-card rounded-xl p-5 sm:p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-bold text-white mb-1">Your API Key</h3>
+                                <p class="text-purple-200 text-sm">Keep this secret and never share it publicly</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button id="toggleApiKeyBtn" 
+                                        class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200">
+                                    <i id="eyeIcon" class="fas fa-eye mr-2"></i>
+                                    <span id="eyeText">Show</span>
+                                </button>
+                                <button id="copyApiKeyBtn" 
+                                        class="px-4 py-2 bg-white hover:bg-gray-100 text-primary-700 rounded-lg font-medium transition-all duration-200">
+                                    <i class="fas fa-copy mr-2"></i>
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="relative mb-4">
+                            <input type="password" 
+                                   id="apiKeyInput" 
+                                   value="<%= user.api_key %>" 
+                                   readonly
+                                   class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white font-mono text-sm">
+                        </div>
+                        
+                        <div class="flex items-center text-purple-200 text-sm">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            <span>This key grants access to your account. Store it securely.</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="card overflow-hidden">
+                        <div class="p-5 sm:p-6 border-b">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900">Recent Activity</h3>
+                                <span class="text-sm text-gray-500">
+                                    Last <%= recentLogs.length %> requests
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Endpoint</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Method</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Time</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <% if (recentLogs.length === 0) { %>
                                     <tr>
-                                        <td class="px-6 py-4 text-sm font-mono"><%= log.endpoint %></td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs rounded <%= log.method === 'GET' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' %>">
-                                                <%= log.method %>
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">
-                                            <%= new Date(log.created_at).toLocaleTimeString() %>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Success</span>
+                                        <td colspan="4" class="py-8 px-4 text-center">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                                    <i class="fas fa-inbox text-gray-400"></i>
+                                                </div>
+                                                <p class="text-gray-500 font-medium">No activity yet</p>
+                                                <p class="text-gray-400 text-sm mt-1">Your API requests will appear here</p>
+                                            </div>
                                         </td>
                                     </tr>
-                                    <% }); %>
-                                <% } %>
-                            </tbody>
-                        </table>
+                                    <% } else { %>
+                                        <% recentLogs.forEach(log => { %>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="py-3 px-4 font-mono text-sm">
+                                                <%= log.endpoint %>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="px-2 py-1 rounded text-xs font-medium 
+                                                      <%= log.method === 'GET' ? 'bg-blue-100 text-blue-800' : 
+                                                         log.method === 'POST' ? 'bg-green-100 text-green-800' : 
+                                                         'bg-gray-100 text-gray-800' %>">
+                                                    <%= log.method %>
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-4 text-gray-600 text-sm">
+                                                <%= new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                    <i class="fas fa-check mr-1"></i>Success
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- API Docs Section (Hidden by default) -->
-            <section id="api-section" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-xl shadow">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">API Documentation</h2>
-                    <!-- API docs content -->
-                </div>
-            </section>
-
-            <!-- Info Section (Hidden by default) -->
-            <section id="info-section" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-xl shadow">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Information</h2>
-                    <!-- Info content -->
-                </div>
-            </section>
-
-            <!-- Upgrade Section (Hidden by default) -->
-            <section id="upgrade-section" class="space-y-6 hidden">
-                <div class="bg-white p-6 rounded-xl shadow">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Upgrade Plan</h2>
-                    <!-- Upgrade content -->
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <script>
-        // Simple initialization without complex error handling
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard loaded');
-            
-            // Hide loading screen immediately
-            setTimeout(function() {
-                document.getElementById('loading').classList.add('loading-hidden');
+                </section>
                 
-                // Remove loading screen from DOM after animation
-                setTimeout(function() {
+                <!-- Other sections (API, Info, Upgrade) remain the same -->
+                <!-- API Documentation Section -->
+                <section id="api-section" class="space-y-6 hidden">
+                    <div class="card p-5 sm:p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">API Documentation</h2>
+                        <!-- Content same as before -->
+                    </div>
+                </section>
+                
+                <!-- Information Section -->
+                <section id="info-section" class="space-y-6 hidden">
+                    <div class="card p-5 sm:p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Information</h2>
+                        <!-- Content same as before -->
+                    </div>
+                </section>
+                
+                <!-- Upgrade Plan Section -->
+                <section id="upgrade-section" class="space-y-6 hidden">
+                    <div class="card p-5 sm:p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Upgrade Plan</h2>
+                        <!-- Content same as before -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== SIMPLE INITIALIZATION ====================
+        
+        // Hide loading immediately when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            // Initialize immediately
+            setTimeout(function() {
+                try {
+                    // Hide loading
+                    const loading = document.getElementById('loading');
+                    loading.classList.add('fade-out');
+                    
+                    setTimeout(function() {
+                        loading.style.display = 'none';
+                        console.log('Loading hidden');
+                    }, 300);
+                    
+                    // Setup basic event listeners
+                    setupBasicListeners();
+                    
+                    // Show initial section
+                    const hash = window.location.hash.substring(1) || 'overview';
+                    showSection(hash);
+                    
+                } catch (error) {
+                    console.error('Initialization error:', error);
+                    // Force hide loading even on error
                     document.getElementById('loading').style.display = 'none';
-                }, 300);
-            }, 500);
-            
-            // Initialize navigation
-            initNavigation();
-            
-            // Setup API key functionality
-            initApiKey();
+                }
+            }, 500); // 500ms delay to ensure everything is ready
         });
         
-        function initNavigation() {
-            // Get current hash from URL
-            const hash = window.location.hash.substring(1) || 'overview';
-            showSection(hash);
+        function setupBasicListeners() {
+            console.log('Setting up basic listeners');
             
-            // Set up navigation links
-            document.querySelectorAll('a[href^="#"]').forEach(link => {
+            // Sidebar toggle for mobile
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', toggleSidebar);
+            }
+            
+            // Mobile overlay
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            if (mobileOverlay) {
+                mobileOverlay.addEventListener('click', toggleSidebar);
+            }
+            
+            // API Key toggle
+            const toggleBtn = document.getElementById('toggleApiKeyBtn');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    const input = document.getElementById('apiKeyInput');
+                    const eyeIcon = document.getElementById('eyeIcon');
+                    const eyeText = document.getElementById('eyeText');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        eyeIcon.className = 'fas fa-eye-slash mr-2';
+                        eyeText.textContent = 'Hide';
+                    } else {
+                        input.type = 'password';
+                        eyeIcon.className = 'fas fa-eye mr-2';
+                        eyeText.textContent = 'Show';
+                    }
+                });
+            }
+            
+            // API Key copy
+            const copyBtn = document.getElementById('copyApiKeyBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    const input = document.getElementById('apiKeyInput');
+                    input.select();
+                    input.setSelectionRange(0, 99999);
+                    
+                    try {
+                        navigator.clipboard.writeText(input.value);
+                        showToast('API Key copied to clipboard!', 'success');
+                    } catch (err) {
+                        console.error('Copy failed:', err);
+                        showToast('Failed to copy', 'error');
+                    }
+                });
+            }
+            
+            // Navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.getAttribute('href').substring(1);
-                    showSection(section);
+                    // Remove active class from all links
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
                 });
             });
             
-            // Handle hash changes
-            window.addEventListener('hashchange', function() {
-                const hash = window.location.hash.substring(1) || 'overview';
-                showSection(hash);
+            // Logout button
+            const logoutBtns = document.querySelectorAll('button[onclick*="handleLogout"]');
+            logoutBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to logout?')) {
+                        window.location.href = '/auth/logout';
+                    }
+                });
             });
         }
         
+        // ==================== BASIC FUNCTIONS ====================
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Prevent body scroll when sidebar is open
+            if (sidebar.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+        
         function showSection(section) {
+            console.log('Showing section:', section);
+            
             // Hide all sections
             document.querySelectorAll('main > section').forEach(sec => {
                 sec.classList.add('hidden');
             });
             
             // Show selected section
-            const target = document.getElementById(section + '-section');
-            if (target) {
-                target.classList.remove('hidden');
+            const targetSection = document.getElementById(section + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
             }
-            
-            // Update active nav
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.getAttribute('href') === '#' + section) {
-                    item.classList.add('active');
-                }
-            });
             
             // Close sidebar on mobile
             if (window.innerWidth < 768) {
-                closeSidebar();
+                toggleSidebar();
             }
         }
         
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
             
-            sidebar.classList.toggle('sidebar-open');
-            overlay.classList.toggle('hidden');
-        }
-        
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
+            // Set message and icon
+            toastMessage.textContent = message;
             
-            sidebar.classList.remove('sidebar-open');
-            overlay.classList.add('hidden');
-        }
-        
-        // API Key Functions
-        function initApiKey() {
-            window.isApiKeyVisible = false;
-        }
-        
-        function toggleApiKey() {
-            const input = document.getElementById('apiKey');
-            const eyeIcon = document.getElementById('eyeIcon');
-            const toggleText = document.getElementById('toggleText');
-            
-            window.isApiKeyVisible = !window.isApiKeyVisible;
-            input.type = window.isApiKeyVisible ? 'text' : 'password';
-            eyeIcon.className = window.isApiKeyVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
-            toggleText.textContent = window.isApiKeyVisible ? 'Hide Key' : 'Show Key';
-        }
-        
-        function copyApiKey() {
-            const input = document.getElementById('apiKey');
-            
-            input.select();
-            input.setSelectionRange(0, 99999);
-            
-            try {
-                navigator.clipboard.writeText(input.value);
-                alert('API key copied to clipboard!');
-            } catch (err) {
-                // Fallback for older browsers
-                document.execCommand('copy');
-                alert('API key copied!');
+            switch(type) {
+                case 'success':
+                    toastIcon.className = 'fas fa-check-circle text-green-400 text-xl';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fas fa-exclamation-circle text-red-400 text-xl';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fas fa-exclamation-triangle text-yellow-400 text-xl';
+                    break;
+                default:
+                    toastIcon.className = 'fas fa-info-circle text-blue-400 text-xl';
             }
+            
+            // Show toast
+            toast.classList.add('show');
+            
+            // Hide after 3 seconds
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 3000);
         }
         
-        function logout() {
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('show');
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                // Close sidebar and reset body overflow on desktop
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobileOverlay');
+                
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Make functions available globally
+        window.toggleSidebar = toggleSidebar;
+        window.showSection = showSection;
+        window.showToast = showToast;
+        window.hideToast = hideToast;
+        
+        // Simple logout handler
+        window.handleLogout = function() {
             if (confirm('Are you sure you want to logout?')) {
                 window.location.href = '/auth/logout';
             }
-        }
+        };
         
-        // Expose functions to global scope for inline onclick handlers
-        window.toggleSidebar = toggleSidebar;
-        window.closeSidebar = closeSidebar;
-        window.toggleApiKey = toggleApiKey;
-        window.copyApiKey = copyApiKey;
-        window.logout = logout;
+        console.log('Dashboard initialized successfully');
     </script>
 </body>
 </html>
