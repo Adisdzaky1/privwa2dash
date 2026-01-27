@@ -4,183 +4,288 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        @media (max-width: 768px) {
+            .mobile-scroll { overflow-x: auto; }
+            .mobile-stack { flex-direction: column; }
+            .mobile-center { text-align: center; }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-                <div class="flex items-center">
-                    <a href="/dashboard" class="flex items-center">
-                        <i class="fas fa-comments text-purple-600 text-2xl mr-2"></i>
-                        <span class="text-2xl font-bold text-gray-900">WhatsGate</span>
-                    </a>
-                    <span class="ml-4 px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">ADMIN</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/dashboard" class="text-gray-600 hover:text-gray-900">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
-                    </a>
-                    <button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                    </button>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="flex items-center">
+                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 w-10 h-10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-comments text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900 ml-3">WhatsGate</span>
+                </a>
+                <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">ADMIN PANEL</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/dashboard" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>Dashboard
+                </a>
+                <button onclick="logout()" class="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg hover:from-red-700 hover:to-red-600 transition flex items-center text-sm">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">User Management</h1>
+            <p class="text-gray-600 mt-2">Manage all users, plans, and permissions</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Users</p>
+                        <p class="text-2xl font-bold text-gray-900"><%= users.length %></p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fas fa-users text-blue-600"></i>
+                    </div>
                 </div>
             </div>
-        </header>
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active Today</p>
+                        <p class="text-2xl font-bold text-gray-900"><%= users.filter(u => u.requests_used_today > 0).length %></p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="fas fa-chart-line text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Pro Users</p>
+                        <p class="text-2xl font-bold text-gray-900"><%= users.filter(u => u.plan === 'pro').length %></p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <i class="fas fa-crown text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Requests</p>
+                        <p class="text-2xl font-bold text-gray-900"><%= users.reduce((sum, user) => sum + user.total_requests, 0).toLocaleString() %></p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-lg">
+                        <i class="fas fa-exchange-alt text-orange-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-8">User Management</h1>
-
-            <!-- Users Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">User</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Email</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Plan</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Daily Limit</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Used Today</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Requests</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Plan Expires</th>
-                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% users.forEach(user => { %>
-                            <tr class="border-t hover:bg-gray-50">
-                                <td class="py-3 px-4">
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold mr-2">
-                                            <%= user.username.charAt(0).toUpperCase() %>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-gray-900"><%= user.username %></p>
+        <!-- Users Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">All Users</h2>
+                    <p class="text-gray-500 text-sm">Click edit to modify user plan</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="relative">
+                        <input type="text" placeholder="Search users..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mobile-scroll">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">User</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">Plan</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">Daily Limit</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">Used Today</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">Total</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">Expires</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user => { %>
+                        <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                            <td class="py-4 px-6">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold mr-3">
+                                        <%= user.username.charAt(0).toUpperCase() %>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900"><%= user.username %></p>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <p class="text-sm text-gray-500"><%= user.email %></p>
                                             <% if (user.role === 'admin') { %>
-                                            <span class="text-xs text-red-600 font-semibold">ADMIN</span>
+                                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">ADMIN</span>
                                             <% } %>
                                         </div>
                                     </div>
-                                </td>
-                                <td class="py-3 px-4 text-sm text-gray-600"><%= user.email %></td>
-                                <td class="py-3 px-4">
-                                    <span class="px-2 py-1 bg-<%= user.plan === 'free' ? 'gray' : user.plan === 'pro' ? 'purple' : 'blue' %>-100 text-<%= user.plan === 'free' ? 'gray' : user.plan === 'pro' ? 'purple' : 'blue' %>-800 rounded text-xs font-semibold uppercase">
-                                        <%= user.plan %>
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-sm text-gray-900 font-semibold"><%= user.daily_limit %></td>
-                                <td class="py-3 px-4 text-sm text-gray-600"><%= user.requests_used_today %></td>
-                                <td class="py-3 px-4 text-sm text-gray-900 font-semibold"><%= user.total_requests.toLocaleString() %></td>
-                                <td class="py-3 px-4 text-sm text-gray-600">
-                                    <% if (user.plan_expires_at) { %>
-                                        <%= new Date(user.plan_expires_at).toLocaleDateString() %>
-                                    <% } else { %>
-                                        <span class="text-gray-400">-</span>
-                                    <% } %>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <div class="flex items-center space-x-2">
-                                        <button onclick="openEditModal('<%= user.id %>', '<%= user.username %>', '<%= user.plan %>', <%= user.daily_limit %>, '<%= user.plan_expires_at || '' %>')" 
-                                                class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition">
-                                            <i class="fas fa-edit mr-1"></i>Edit
-                                        </button>
-                                        <% if (user.role !== 'admin') { %>
-                                        <button onclick="deleteUser('<%= user.id %>', '<%= user.username %>')" 
-                                                class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition">
-                                            <i class="fas fa-trash mr-1"></i>Delete
-                                        </button>
-                                        <% } %>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="px-3 py-1.5 rounded-full text-xs font-semibold 
+                                    <%= user.plan === 'free' ? 'bg-gray-100 text-gray-800' : '' %>
+                                    <%= user.plan === 'pro' ? 'bg-purple-100 text-purple-800' : '' %>
+                                    <%= user.plan === 'enterprise' ? 'bg-blue-100 text-blue-800' : '' %>
+                                    <%= user.plan === 'custom' ? 'bg-green-100 text-green-800' : '' %>">
+                                    <i class="fas <%= user.plan === 'pro' ? 'fa-crown' : user.plan === 'enterprise' ? 'fa-building' : 'fa-user' %> mr-1"></i>
+                                    <%= user.plan.toUpperCase() %>
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="text-lg font-bold text-gray-900"><%= user.daily_limit %></span>
+                                <p class="text-xs text-gray-500">per day</p>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-900 mr-2"><%= user.requests_used_today %></span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-600 h-2 rounded-full" 
+                                             style="width: <%= Math.min((user.requests_used_today / user.daily_limit) * 100, 100) %>%"></div>
                                     </div>
-                                </td>
-                            </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="font-bold text-gray-900"><%= user.total_requests.toLocaleString() %></span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <% if (user.plan_expires_at) { %>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                                        <span class="text-gray-700"><%= new Date(user.plan_expires_at).toLocaleDateString() %></span>
+                                    </div>
+                                <% } else { %>
+                                    <span class="text-gray-400">No expiration</span>
+                                <% } %>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="openEditModal('<%= user.id %>', '<%= user.username %>', '<%= user.plan %>', <%= user.daily_limit %>, '<%= user.plan_expires_at || '' %>')" 
+                                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center text-sm">
+                                        <i class="fas fa-edit mr-2"></i>Edit
+                                    </button>
+                                    <% if (user.role !== 'admin') { %>
+                                    <button onclick="deleteUser('<%= user.id %>', '<%= user.username %>')" 
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center text-sm">
+                                        <i class="fas fa-trash mr-2"></i>Delete
+                                    </button>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <!-- Edit Plan Modal -->
-    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 transform transition-all duration-300">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-gray-900">Edit User Plan</h2>
-                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Edit User Plan</h2>
+                    <p class="text-gray-500 text-sm">Update plan settings and limits</p>
+                </div>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
 
-            <form id="editPlanForm" class="space-y-4">
+            <form id="editPlanForm" class="space-y-5">
                 <input type="hidden" id="editUserId" name="userId">
                 
-                <div>
+                <div class="bg-gray-50 p-4 rounded-xl">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input type="text" id="editUsername" readonly 
-                           class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold mr-3">
+                            <span id="editUserInitial"></span>
+                        </div>
+                        <input type="text" id="editUsername" readonly 
+                               class="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Plan Type</label>
+                        <select id="editPlan" name="plan" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition">
+                            <option value="free">Free Plan</option>
+                            <option value="pro">Pro Plan</option>
+                            <option value="enterprise">Enterprise</option>
+                            <option value="custom">Custom Plan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Daily Limit</label>
+                        <input type="number" id="editDailyLimit" name="dailyLimit" min="1" max="100000" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition">
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan</label>
-                    <select id="editPlan" name="plan" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
-                        <option value="free">Free</option>
-                        <option value="pro">Pro</option>
-                        <option value="enterprise">Enterprise</option>
-                        <option value="custom">Custom</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan Duration</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="editPlanDays" name="planDays" min="0" placeholder="0 = No expiration"
+                               class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition">
+                        <span class="text-gray-500 text-sm">days</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Set 0 for unlimited duration</p>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Daily Request Limit</label>
-                    <input type="number" id="editDailyLimit" name="dailyLimit" min="1" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
+                <!-- Messages -->
+                <div id="editError" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-3"></i>
+                        <div>
+                            <strong class="font-medium">Error!</strong>
+                            <span id="editErrorText" class="block text-sm"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan Duration (Days)</label>
-                    <input type="number" id="editPlanDays" name="planDays" min="0" placeholder="0 = No expiration"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none">
-                    <p class="text-xs text-gray-500 mt-1">Leave 0 or empty for no expiration</p>
+                <div id="editSuccess" class="hidden bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        <div>
+                            <strong class="font-medium">Success!</strong>
+                            <span id="editSuccessText" class="block text-sm"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Error Message -->
-                <div id="editError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                    <span id="editErrorText"></span>
-                </div>
-
-                <!-- Success Message -->
-                <div id="editSuccess" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    <span id="editSuccessText"></span>
-                </div>
-
-                <div class="flex space-x-3">
+                <div class="flex space-x-3 pt-4">
                     <button type="submit" id="saveBtn"
-                            class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center justify-center">
                         <span id="saveBtnText">Save Changes</span>
                         <i id="saveBtnSpinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
                     </button>
                     <button type="button" onclick="closeEditModal()"
-                            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            class="px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
                         Cancel
                     </button>
                 </div>
@@ -188,14 +293,21 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Get CSRF token (if using)
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content || '';
+        }
+
+        // Edit Modal Functions
         function openEditModal(userId, username, plan, dailyLimit, expiresAt) {
             document.getElementById('editUserId').value = userId;
             document.getElementById('editUsername').value = username;
+            document.getElementById('editUserInitial').textContent = username.charAt(0).toUpperCase();
             document.getElementById('editPlan').value = plan;
             document.getElementById('editDailyLimit').value = dailyLimit;
             
-            // Calculate days remaining if plan expires
             if (expiresAt) {
                 const now = new Date();
                 const expires = new Date(expiresAt);
@@ -211,7 +323,6 @@
 
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
-            document.getElementById('editPlanForm').reset();
             hideEditMessages();
         }
 
@@ -250,6 +361,7 @@
             }
         }
 
+        // Form Submission
         document.getElementById('editPlanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             hideEditMessages();
@@ -259,67 +371,155 @@
             const data = {
                 userId: formData.get('userId'),
                 plan: formData.get('plan'),
-                dailyLimit: formData.get('dailyLimit'),
-                planDays: formData.get('planDays') || 0
+                dailyLimit: parseInt(formData.get('dailyLimit')),
+                planDays: parseInt(formData.get('planDays')) || 0
             };
+
+            // Validation
+            if (data.dailyLimit < 1) {
+                showEditError('Daily limit must be at least 1');
+                setEditLoading(false);
+                return;
+            }
+
+            if (data.planDays < 0) {
+                showEditError('Plan days cannot be negative');
+                setEditLoading(false);
+                return;
+            }
 
             try {
                 const response = await fetch('/admin/update-plan', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': getCsrfToken()
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin'
                 });
 
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    showEditSuccess(result.message);
+                    showEditSuccess(result.message || 'Plan updated successfully!');
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    showEditError(result.error || 'Failed to update plan');
+                    showEditError(result.error || 'Failed to update plan. Please try again.');
                 }
             } catch (error) {
-                showEditError('An error occurred. Please try again.');
+                console.error('Update error:', error);
+                showEditError('Network error. Please check your connection.');
             } finally {
                 setEditLoading(false);
             }
         });
 
+        // Delete User Function
         async function deleteUser(userId, username) {
-            if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
-                return;
-            }
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: `User "${username}" will be permanently deleted!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                background: '#fff',
+                backdrop: 'rgba(0,0,0,0.5)'
+            });
 
-            try {
-                const response = await fetch(`/admin/user/${userId}`, {
-                    method: 'DELETE'
-                });
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin/user/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-Token': getCsrfToken()
+                        },
+                        credentials: 'same-origin'
+                    });
 
-                const result = await response.json();
+                    const data = await response.json();
 
-                if (response.ok && result.success) {
-                    alert(result.message);
-                    window.location.reload();
-                } else {
-                    alert(result.error || 'Failed to delete user');
+                    if (response.ok && data.success) {
+                        await Swal.fire({
+                            title: 'Deleted!',
+                            text: data.message || 'User has been deleted.',
+                            icon: 'success',
+                            confirmButtonColor: '#10b981',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                        window.location.reload();
+                    } else {
+                        throw new Error(data.error || 'Failed to delete user');
+                    }
+                } catch (error) {
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: error.message,
+                        icon: 'error',
+                        confirmButtonColor: '#ef4444'
+                    });
                 }
-            } catch (error) {
-                alert('An error occurred. Please try again.');
             }
         }
 
+        // Logout Function
         async function logout() {
-            try {
-                await fetch('/auth/logout', { method: 'POST' });
-                window.location.href = '/login';
-            } catch (error) {
-                console.error('Logout error:', error);
+            const result = await Swal.fire({
+                title: 'Logout?',
+                text: 'Are you sure you want to logout?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/auth/logout', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-Token': getCsrfToken()
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/login';
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = '/login';
+                }
             }
         }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeEditModal();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('editModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') {
+                closeEditModal();
+            }
+        });
+
+        // Auto-refresh page every 5 minutes to keep data fresh
+        setTimeout(() => {
+            window.location.reload();
+        }, 300000); // 5 minutes
     </script>
 </body>
 </html>
