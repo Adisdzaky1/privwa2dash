@@ -3,44 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>WhatsGate - WhatsApp API Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        
         .gradient-bg { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #4f46e5 100%);
             background-size: 200% 200%;
             animation: gradient 15s ease infinite;
         }
+        
         @keyframes gradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        
         .card-hover { 
             transition: all 0.3s ease; 
         }
+        
         .card-hover:hover { 
             transform: translateY(-8px); 
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
+        
         .pulse-animation {
             animation: pulse 2s infinite;
         }
+        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+        
         .mobile-menu {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
         }
+        
         .mobile-menu.active {
             transform: translateX(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .icon-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
     </style>
 </head>
@@ -60,13 +88,23 @@
                 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-1">
-                    <a href="#features" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">Features</a>
-                    <a href="#pricing" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">Pricing</a>
-                    <a href="#docs" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">Docs</a>
-                    <a href="#faq" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">FAQ</a>
-                    <a href="/login" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">Login</a>
+                    <a href="#features" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-star mr-2"></i>Features
+                    </a>
+                    <a href="#pricing" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-tags mr-2"></i>Pricing
+                    </a>
+                    <a href="#docs" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-book mr-2"></i>Docs
+                    </a>
+                    <a href="#faq" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-question-circle mr-2"></i>FAQ
+                    </a>
+                    <a href="/login" class="px-4 py-2 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </a>
                     <a href="/register" class="ml-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2.5 rounded-lg hover:from-purple-700 hover:to-blue-700 transition font-semibold pulse-animation">
-                        Get Started Free
+                        <i class="fas fa-rocket mr-2"></i>Get Started Free
                     </a>
                 </div>
 
@@ -92,13 +130,23 @@
                     </button>
                 </div>
                 <div class="space-y-4">
-                    <a href="#features" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" onclick="closeMobileMenu()">Features</a>
-                    <a href="#pricing" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" onclick="closeMobileMenu()">Pricing</a>
-                    <a href="#docs" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" onclick="closeMobileMenu()">Documentation</a>
-                    <a href="#faq" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" onclick="closeMobileMenu()">FAQ</a>
-                    <a href="/login" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" onclick="closeMobileMenu()">Login</a>
+                    <a href="#features" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-star mr-2"></i>Features
+                    </a>
+                    <a href="#pricing" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-tags mr-2"></i>Pricing
+                    </a>
+                    <a href="#docs" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-book mr-2"></i>Documentation
+                    </a>
+                    <a href="#faq" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-question-circle mr-2"></i>FAQ
+                    </a>
+                    <a href="/login" class="block px-4 py-3 text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </a>
                     <a href="/register" class="block mt-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition font-semibold text-center">
-                        Get Started Free
+                        <i class="fas fa-rocket mr-2"></i>Get Started Free
                     </a>
                 </div>
             </div>
@@ -109,31 +157,42 @@
     <!-- Hero Section -->
     <section class="gradient-bg text-white py-16 md:py-24 relative overflow-hidden">
         <div class="absolute inset-0 opacity-10">
-            <div class="absolute top-10 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl"></div>
-            <div class="absolute bottom-10 right-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl"></div>
+            <div class="absolute top-10 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl icon-float"></div>
+            <div class="absolute bottom-10 right-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl icon-float" style="animation-delay: 1s;"></div>
         </div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="text-center">
+                <div class="inline-block mb-6">
+                    <span class="bg-white bg-opacity-20 backdrop-blur-lg text-white px-4 py-2 rounded-full text-sm font-semibold">
+                        <i class="fas fa-rocket mr-2"></i>Trusted by 10,000+ Developers
+                    </span>
+                </div>
                 <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                    WhatsApp API Gateway
+                    <i class="fab fa-whatsapp text-green-400 mr-4"></i>WhatsApp API Gateway
                     <span class="block text-purple-200 mt-2">For Developers</span>
                 </h1>
                 <p class="text-xl md:text-2xl mb-8 text-purple-100 max-w-3xl mx-auto">
-                    Send WhatsApp messages programmatically with our powerful, reliable, and easy-to-use API
+                    <i class="fas fa-code mr-2"></i>Send WhatsApp messages programmatically with our powerful, reliable, and easy-to-use API
                 </p>
                 
                 <!-- Stats -->
                 <div class="flex flex-wrap justify-center items-center gap-6 mb-10">
                     <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-xl px-6 py-4 min-w-[180px]">
-                        <div class="text-3xl font-bold"><%= totalRequests.toLocaleString() %>+</div>
+                        <div class="text-3xl font-bold">
+                            <i class="fas fa-paper-plane text-green-400 mr-2"></i>1M+
+                        </div>
                         <div class="text-sm text-purple-100">Messages Sent</div>
                     </div>
                     <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-xl px-6 py-4 min-w-[180px]">
-                        <div class="text-3xl font-bold">99.9%</div>
+                        <div class="text-3xl font-bold">
+                            <i class="fas fa-check-circle text-green-400 mr-2"></i>99.9%
+                        </div>
                         <div class="text-sm text-purple-100">Uptime SLA</div>
                     </div>
                     <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-xl px-6 py-4 min-w-[180px]">
-                        <div class="text-3xl font-bold">24/7</div>
+                        <div class="text-3xl font-bold">
+                            <i class="fas fa-headset text-blue-400 mr-2"></i>24/7
+                        </div>
                         <div class="text-sm text-purple-100">Support</div>
                     </div>
                 </div>
@@ -147,7 +206,9 @@
                     </a>
                 </div>
                 
-                <p class="text-purple-200 text-sm mt-6">No credit card required • Free 14-day trial</p>
+                <p class="text-purple-200 text-sm mt-6">
+                    <i class="fas fa-shield-alt mr-2"></i>No credit card required • Free 14-day trial
+                </p>
             </div>
         </div>
     </section>
@@ -156,7 +217,9 @@
     <section id="features" class="py-16 md:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Powerful Features for Developers</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-star text-yellow-500 mr-3"></i>Powerful Features for Developers
+                </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">Everything you need to integrate WhatsApp messaging into your applications</p>
             </div>
             
@@ -164,84 +227,120 @@
                 <!-- Feature 1 -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg card-hover border border-gray-100">
                     <div class="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-bolt text-white text-2xl"></i>
+                        <i class="fas fa-bolt text-white text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3 text-gray-900">Lightning Fast Delivery</h3>
                     <p class="text-gray-600 mb-4">Send messages in under 2 seconds with our optimized global infrastructure and CDN network.</p>
                     <ul class="text-gray-500 text-sm space-y-2">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Global low-latency network</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> 99.9% delivery rate</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Real-time status updates</li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i> Global low-latency network
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i> 99.9% delivery rate
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i> Real-time status updates
+                        </li>
                     </ul>
                 </div>
                 
                 <!-- Feature 2 -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg card-hover border border-gray-100">
-                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-white text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3 text-gray-900">Enterprise Security</h3>
                     <p class="text-gray-600 mb-4">Bank-level security with end-to-end encryption, SOC2 compliance, and GDPR-ready infrastructure.</p>
                     <ul class="text-gray-500 text-sm space-y-2">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> End-to-end encryption</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Data residency options</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Audit logs & compliance</li>
+                        <li class="flex items-center">
+                            <i class="fas fa-lock text-green-500 mr-2"></i> End-to-end encryption
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-globe text-green-500 mr-2"></i> Data residency options
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-clipboard-check text-green-500 mr-2"></i> Audit logs & compliance
+                        </li>
                     </ul>
                 </div>
                 
                 <!-- Feature 3 -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg card-hover border border-gray-100">
-                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-code text-white text-2xl"></i>
+                    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-code text-white text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3 text-gray-900">Easy Integration</h3>
                     <p class="text-gray-600 mb-4">Simple REST API with SDKs for all major languages and frameworks. Get started in minutes.</p>
                     <ul class="text-gray-500 text-sm space-y-2">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> REST API & Webhooks</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> SDKs for 10+ languages</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Postman collection</li>
+                        <li class="flex items-center">
+                            <i class="fas fa-plug text-blue-500 mr-2"></i> REST API & Webhooks
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-terminal text-blue-500 mr-2"></i> SDKs for 10+ languages
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-file-code text-blue-500 mr-2"></i> Postman collection
+                        </li>
                     </ul>
                 </div>
                 
                 <!-- Feature 4 -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg card-hover border border-gray-100">
-                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    <div class="bg-gradient-to-r from-orange-500 to-red-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-white text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3 text-gray-900">Advanced Analytics</h3>
                     <p class="text-gray-600 mb-4">Comprehensive dashboard with real-time analytics, delivery reports, and performance metrics.</p>
                     <ul class="text-gray-500 text-sm space-y-2">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Real-time analytics</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Delivery reports</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Exportable logs</li>
+                        <li class="flex items-center">
+                            <i class="fas fa-tachometer-alt text-orange-500 mr-2"></i> Real-time analytics
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-file-alt text-orange-500 mr-2"></i> Delivery reports
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-download text-orange-500 mr-2"></i> Exportable logs
+                        </li>
                     </ul>
                 </div>
                 
                 <!-- Feature 5 -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg card-hover border border-gray-100">
-                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-mobile-alt text-white text-2xl"></i>
+                    <div class="bg-gradient-to-r from-pink-500 to-rose-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-images text-white text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3 text-gray-900">Media Support</h3>
                     <p class="text-gray-600 mb-4">Send images, videos, documents, and audio files with automatic optimization and compression.</p>
                     <ul class="text-gray-500 text-sm space-y-2">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Images & Videos</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> PDF & Documents</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Audio messages</li>
+                        <li class="flex items-center">
+                            <i class="fas fa-image text-pink-500 mr-2"></i> Images & Videos
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-file-pdf text-pink-500 mr-2"></i> PDF & Documents
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-microphone text-pink-500 mr-2"></i> Audio messages
+                        </li>
                     </ul>
                 </div>
                 
                 <!-- Feature 6 -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg card-hover border border-gray-100">
-                    <div class="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-headset text-white text-2xl"></i>
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-headset text-white text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3 text-gray-900">24/7 Support</h3>
                     <p class="text-gray-600 mb-4">Dedicated support team available 24/7 via chat, email, and phone for all plan levels.</p>
                     <ul class="text-gray-500 text-sm space-y-2">
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Priority support</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Technical onboarding</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> SLA guarantees</li>
+                        <li class="flex items-center">
+                            <i class="fas fa-star text-indigo-500 mr-2"></i> Priority support
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-graduation-cap text-indigo-500 mr-2"></i> Technical onboarding
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-certificate text-indigo-500 mr-2"></i> SLA guarantees
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -252,16 +351,21 @@
     <section id="pricing" class="bg-gray-50 py-16 md:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-tags text-purple-600 mr-3"></i>Simple, Transparent Pricing
+                </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">Start for free, upgrade as you grow. No hidden fees.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 <!-- Free Plan -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 flex flex-col">
-                    <div class="mb-6">
+                    <div class="text-center mb-6">
+                        <div class="inline-block bg-gray-100 rounded-full p-4 mb-4">
+                            <i class="fas fa-gift text-gray-600 text-3xl"></i>
+                        </div>
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Free</h3>
-                        <div class="flex items-baseline mb-4">
+                        <div class="flex items-baseline justify-center mb-4">
                             <span class="text-4xl font-bold text-gray-900">$0</span>
                             <span class="text-gray-500 ml-2">/month</span>
                         </div>
@@ -270,45 +374,50 @@
                     
                     <ul class="space-y-4 mb-8 flex-grow">
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
                             <span><strong>6 requests/day</strong> included</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-envelope text-green-500 mt-1 mr-3"></i>
                             <span>Basic email support</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-book-open text-green-500 mt-1 mr-3"></i>
                             <span>API documentation</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-users text-green-500 mt-1 mr-3"></i>
                             <span>Community forum access</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-times text-gray-300 mt-1 mr-3"></i>
+                            <i class="fas fa-times-circle text-gray-300 mt-1 mr-3"></i>
                             <span class="text-gray-400">No media attachments</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-times text-gray-300 mt-1 mr-3"></i>
+                            <i class="fas fa-times-circle text-gray-300 mt-1 mr-3"></i>
                             <span class="text-gray-400">No priority support</span>
                         </li>
                     </ul>
                     
                     <a href="/register" class="block w-full bg-gray-100 text-gray-800 py-4 rounded-xl text-center font-semibold hover:bg-gray-200 transition">
-                        Get Started Free
+                        <i class="fas fa-play-circle mr-2"></i>Get Started Free
                     </a>
                 </div>
                 
                 <!-- Pro Plan (Highlighted) -->
                 <div class="bg-gradient-to-b from-purple-600 to-blue-600 rounded-2xl shadow-2xl p-8 flex flex-col transform md:scale-105 relative">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-yellow-400 text-purple-900 text-xs font-bold px-4 py-2 rounded-full">MOST POPULAR</span>
+                        <span class="bg-yellow-400 text-purple-900 text-xs font-bold px-4 py-2 rounded-full">
+                            <i class="fas fa-crown mr-1"></i>MOST POPULAR
+                        </span>
                     </div>
                     
-                    <div class="mb-6">
+                    <div class="text-center mb-6">
+                        <div class="inline-block bg-white bg-opacity-20 rounded-full p-4 mb-4">
+                            <i class="fas fa-rocket text-white text-3xl"></i>
+                        </div>
                         <h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
-                        <div class="flex items-baseline mb-4">
+                        <div class="flex items-baseline justify-center mb-4">
                             <span class="text-4xl font-bold text-white">$29</span>
                             <span class="text-purple-200 ml-2">/month</span>
                         </div>
@@ -317,41 +426,44 @@
                     
                     <ul class="space-y-4 mb-8 flex-grow text-white">
                         <li class="flex items-start">
-                            <i class="fas fa-check text-yellow-300 mt-1 mr-3"></i>
+                            <i class="fas fa-check-circle text-yellow-300 mt-1 mr-3"></i>
                             <span><strong>1,000 requests/day</strong> included</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-yellow-300 mt-1 mr-3"></i>
+                            <i class="fas fa-headset text-yellow-300 mt-1 mr-3"></i>
                             <span>Priority email & chat support</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-yellow-300 mt-1 mr-3"></i>
+                            <i class="fas fa-photo-video text-yellow-300 mt-1 mr-3"></i>
                             <span>All media types supported</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-yellow-300 mt-1 mr-3"></i>
+                            <i class="fas fa-webhook text-yellow-300 mt-1 mr-3"></i>
                             <span>Custom webhooks</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-yellow-300 mt-1 mr-3"></i>
+                            <i class="fas fa-chart-bar text-yellow-300 mt-1 mr-3"></i>
                             <span>Advanced analytics dashboard</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-yellow-300 mt-1 mr-3"></i>
+                            <i class="fas fa-user-friends text-yellow-300 mt-1 mr-3"></i>
                             <span>Team collaboration features</span>
                         </li>
                     </ul>
                     
                     <a href="/register" class="block w-full bg-white text-purple-600 py-4 rounded-xl text-center font-semibold hover:bg-gray-100 transition">
-                        Start Pro Trial
+                        <i class="fas fa-bolt mr-2"></i>Start Pro Trial
                     </a>
                 </div>
                 
                 <!-- Enterprise Plan -->
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 flex flex-col">
-                    <div class="mb-6">
+                    <div class="text-center mb-6">
+                        <div class="inline-block bg-gradient-to-r from-purple-600 to-blue-600 rounded-full p-4 mb-4">
+                            <i class="fas fa-building text-white text-3xl"></i>
+                        </div>
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                        <div class="flex items-baseline mb-4">
+                        <div class="flex items-baseline justify-center mb-4">
                             <span class="text-4xl font-bold text-gray-900">Custom</span>
                         </div>
                         <p class="text-gray-600">For large organizations with custom needs</p>
@@ -359,39 +471,39 @@
                     
                     <ul class="space-y-4 mb-8 flex-grow">
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-infinity text-purple-500 mt-1 mr-3"></i>
                             <span><strong>Unlimited requests</strong></span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-phone-volume text-purple-500 mt-1 mr-3"></i>
                             <span>24/7 phone & dedicated support</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-user-tie text-purple-500 mt-1 mr-3"></i>
                             <span>Dedicated account manager</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-shield-check text-purple-500 mt-1 mr-3"></i>
                             <span>SLA guarantee (99.99% uptime)</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-cogs text-purple-500 mt-1 mr-3"></i>
                             <span>Custom integrations</span>
                         </li>
                         <li class="flex items-start">
-                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <i class="fas fa-server text-purple-500 mt-1 mr-3"></i>
                             <span>On-premise deployment options</span>
                         </li>
                     </ul>
                     
                     <a href="https://t.me/yourtelegram" target="_blank" class="block w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl text-center font-semibold hover:from-purple-700 hover:to-blue-700 transition">
-                        Contact Sales
+                        <i class="fas fa-comments mr-2"></i>Contact Sales
                     </a>
                 </div>
             </div>
             
             <div class="text-center mt-12 text-gray-500 text-sm">
-                <p>All plans include 14-day free trial • No credit card required • Cancel anytime</p>
+                <p><i class="fas fa-info-circle mr-2"></i>All plans include 14-day free trial • No credit card required • Cancel anytime</p>
             </div>
         </div>
     </section>
@@ -400,13 +512,17 @@
     <section id="docs" class="py-16 md:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Developer Friendly API</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-code text-blue-600 mr-3"></i>Developer Friendly API
+                </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">Get started in minutes with our simple REST API</p>
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Send Your First Message</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-terminal text-purple-600 mr-2"></i>Send Your First Message
+                    </h3>
                     <div class="bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
                         <div class="bg-gray-800 px-6 py-4 flex items-center justify-between">
                             <div class="flex items-center space-x-2">
@@ -414,7 +530,9 @@
                                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
                             </div>
-                            <span class="text-gray-400 text-sm">JavaScript Example</span>
+                            <span class="text-gray-400 text-sm">
+                                <i class="fab fa-js text-yellow-400 mr-2"></i>JavaScript Example
+                            </span>
                         </div>
                         <div class="p-6">
                             <pre class="text-gray-300 text-sm overflow-x-auto"><code>// Install SDK: npm install whatsgate-sdk
@@ -448,14 +566,20 @@ sendMessage();</code></pre>
                 </div>
                 
                 <div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Simple REST API</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-layer-group text-blue-600 mr-2"></i>Simple REST API
+                    </h3>
                     <div class="space-y-6">
                         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                             <div class="flex items-center mb-4">
-                                <div class="bg-green-100 text-green-800 px-3 py-1 rounded-lg text-xs font-bold mr-3">GET</div>
+                                <div class="bg-green-100 text-green-800 px-3 py-1 rounded-lg text-xs font-bold mr-3">
+                                    <i class="fas fa-arrow-down mr-1"></i>GET
+                                </div>
                                 <code class="text-gray-800 font-mono">/api/send</code>
                             </div>
-                            <p class="text-gray-600 mb-4">Send a WhatsApp message with a simple GET request</p>
+                            <p class="text-gray-600 mb-4">
+                                <i class="fas fa-info-circle text-blue-500 mr-2"></i>Send a WhatsApp message with a simple GET request
+                            </p>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <code class="text-sm text-gray-700">curl -X GET "https://yourdomain.com/api/send?message=Hello&to=628123456789" -H "x-api-key: YOUR_API_KEY"</code>
                             </div>
@@ -463,10 +587,14 @@ sendMessage();</code></pre>
                         
                         <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                             <div class="flex items-center mb-4">
-                                <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-xs font-bold mr-3">POST</div>
+                                <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-xs font-bold mr-3">
+                                    <i class="fas fa-arrow-up mr-1"></i>POST
+                                </div>
                                 <code class="text-gray-800 font-mono">/api/send</code>
                             </div>
-                            <p class="text-gray-600 mb-4">Send messages with attachments and rich content</p>
+                            <p class="text-gray-600 mb-4">
+                                <i class="fas fa-paperclip text-purple-500 mr-2"></i>Send messages with attachments and rich content
+                            </p>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <code class="text-sm text-gray-700">curl -X POST "https://yourdomain.com/api/send" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -484,34 +612,49 @@ sendMessage();</code></pre>
     <section id="faq" class="bg-gray-50 py-16 md:py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-question-circle text-purple-600 mr-3"></i>Frequently Asked Questions
+                </h2>
                 <p class="text-gray-600 text-lg">Common questions about WhatsGate</p>
             </div>
             
             <div class="space-y-6">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">How quickly can I get started?</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">
+                        <i class="fas fa-clock text-green-500 mr-2"></i>How quickly can I get started?
+                    </h3>
                     <p class="text-gray-600">You can sign up and send your first message in under 5 minutes. No complex setup required.</p>
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Is there a free tier?</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">
+                        <i class="fas fa-gift text-blue-500 mr-2"></i>Is there a free tier?
+                    </h3>
                     <p class="text-gray-600">Yes! We offer a free plan with 6 messages per day, perfect for testing and small projects.</p>
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">What languages are supported?</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">
+                        <i class="fas fa-language text-orange-500 mr-2"></i>What languages are supported?
+                    </h3>
                     <p class="text-gray-600">We provide official SDKs for JavaScript, Python, PHP, Java, Go, Ruby, and C#. Our REST API works with any language.</p>
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">How reliable is the service?</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">
+                        <i class="fas fa-shield-check text-purple-500 mr-2"></i>How reliable is the service?
+                    </h3>
                     <p class="text-gray-600">We guarantee 99.9% uptime with redundant infrastructure across multiple regions. All paid plans include SLA.</p>
                 </div>
             </div>
             
             <div class="text-center mt-12">
-                <p class="text-gray-600">Still have questions? <a href="https://t.me/yourtelegram" target="_blank" class="text-purple-600 font-semibold hover:text-purple-700">Contact our support team</a></p>
+                <p class="text-gray-600">
+                    <i class="fas fa-comment-dots text-purple-600 mr-2"></i>Still have questions? 
+                    <a href="https://t.me/yourtelegram" target="_blank" class="text-purple-600 font-semibold hover:text-purple-700">
+                        Contact our support team
+                    </a>
+                </p>
             </div>
         </div>
     </section>
@@ -519,8 +662,12 @@ sendMessage();</code></pre>
     <!-- CTA Section -->
     <section class="gradient-bg text-white py-16 md:py-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Get Started?</h2>
-            <p class="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">Join thousands of developers who trust WhatsGate for their WhatsApp messaging needs</p>
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">
+                <i class="fas fa-rocket mr-3"></i>Ready to Get Started?
+            </h2>
+            <p class="text-xl text-purple-100 mb-10 max-w-2xl mx-auto">
+                Join thousands of developers who trust WhatsGate for their WhatsApp messaging needs
+            </p>
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                 <a href="/register" class="w-full sm:w-auto bg-white text-purple-600 px-10 py-4 rounded-xl text-lg font-semibold hover:bg-gray-100 transition shadow-2xl">
                     <i class="fas fa-play-circle mr-2"></i>Start Free Trial
@@ -529,7 +676,9 @@ sendMessage();</code></pre>
                     <i class="fas fa-chart-bar mr-2"></i>View Pricing Plans
                 </a>
             </div>
-            <p class="text-purple-200 text-sm mt-8">No credit card required • 14-day free trial • Cancel anytime</p>
+            <p class="text-purple-200 text-sm mt-8">
+                <i class="fas fa-shield-alt mr-2"></i>No credit card required • 14-day free trial • Cancel anytime
+            </p>
         </div>
     </section>
 
@@ -546,47 +695,59 @@ sendMessage();</code></pre>
                     </div>
                     <p class="text-gray-400 mb-6">Simple and powerful WhatsApp API for developers and businesses.</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-xl"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-github text-xl"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
                     </div>
                 </div>
                 
                 <div>
-                    <h4 class="font-bold text-lg mb-6">Product</h4>
+                    <h4 class="font-bold text-lg mb-6">
+                        <i class="fas fa-box mr-2"></i>Product
+                    </h4>
                     <ul class="space-y-3 text-gray-400">
-                        <li><a href="#features" class="hover:text-white transition">Features</a></li>
-                        <li><a href="#pricing" class="hover:text-white transition">Pricing</a></li>
-                        <li><a href="#docs" class="hover:text-white transition">Documentation</a></li>
-                        <li><a href="#" class="hover:text-white transition">API Reference</a></li>
-                        <li><a href="#" class="hover:text-white transition">Status</a></li>
+                        <li><a href="#features" class="hover:text-white transition"><i class="fas fa-star mr-2"></i>Features</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition"><i class="fas fa-tags mr-2"></i>Pricing</a></li>
+                        <li><a href="#docs" class="hover:text-white transition"><i class="fas fa-book mr-2"></i>Documentation</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-code mr-2"></i>API Reference</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-heartbeat mr-2"></i>Status</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="font-bold text-lg mb-6">Company</h4>
+                    <h4 class="font-bold text-lg mb-6">
+                        <i class="fas fa-building mr-2"></i>Company
+                    </h4>
                     <ul class="space-y-3 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">About Us</a></li>
-                        <li><a href="#" class="hover:text-white transition">Blog</a></li>
-                        <li><a href="#" class="hover:text-white transition">Careers</a></li>
-                        <li><a href="#" class="hover:text-white transition">Contact</a></li>
-                        <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-info-circle mr-2"></i>About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-blog mr-2"></i>Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-briefcase mr-2"></i>Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-envelope mr-2"></i>Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-user-shield mr-2"></i>Privacy Policy</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="font-bold text-lg mb-6">Support</h4>
+                    <h4 class="font-bold text-lg mb-6">
+                        <i class="fas fa-life-ring mr-2"></i>Support
+                    </h4>
                     <ul class="space-y-3 text-gray-400">
                         <li><a href="https://t.me/yourtelegram" target="_blank" class="hover:text-white transition"><i class="fab fa-telegram mr-2"></i>Telegram Support</a></li>
                         <li><a href="#" class="hover:text-white transition"><i class="fas fa-question-circle mr-2"></i>Help Center</a></li>
-                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-book mr-2"></i>Tutorials</a></li>
+                        <li><a href="#" class="hover:text-white transition"><i class="fas fa-book-open mr-2"></i>Tutorials</a></li>
                         <li><a href="#" class="hover:text-white transition"><i class="fas fa-file-contract mr-2"></i>Terms of Service</a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-                <p>&copy; 2024 WhatsGate. All rights reserved.</p>
+                <p><i class="fas fa-copyright mr-2"></i>2024 WhatsGate. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -637,6 +798,7 @@ sendMessage();</code></pre>
                             top: target.offsetTop - 80,
                             behavior: 'smooth'
                         });
+                        closeMobileMenu();
                     }
                 }
             });
@@ -661,23 +823,6 @@ sendMessage();</code></pre>
             }
         });
         
-        // Demo alert for "Get Started" buttons
-        document.querySelectorAll('a[href="/register"]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                // Only show alert for demo purposes
-                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Demo Mode',
-                        text: 'In a live environment, this would redirect to the registration page.',
-                        icon: 'info',
-                        confirmButtonColor: '#8b5cf6',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
-        });
-        
         // Add animation to cards on scroll
         const observerOptions = {
             threshold: 0.1,
@@ -696,19 +841,6 @@ sendMessage();</code></pre>
         document.querySelectorAll('.card-hover, .bg-white').forEach(card => {
             observer.observe(card);
         });
-        
-        // Add CSS for fadeIn animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .animate-fadeIn {
-                animation: fadeIn 0.6s ease forwards;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
