@@ -797,6 +797,16 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.use((req, res, next) => {
+    // Untuk routes yang memerlukan autentikasi
+    if (req.session.userId) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
+    next();
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 
