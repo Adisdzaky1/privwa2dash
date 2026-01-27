@@ -67,31 +67,6 @@ app.use(session({
 
 // ==================== CRITICAL FIX: CORS CONFIG ====================
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      process.env.FRONTEND_URL,
-      // Vercel domains
-      /\.vercel\.app$/,
-      /\.vercel\.domain$/
-    ].filter(Boolean);
-    
-    if (allowedOrigins.some(allowed => {
-      if (allowed instanceof RegExp) {
-        return allowed.test(origin);
-      }
-      return allowed === origin;
-    })) {
-      callback(null, true);
-    } else {
-      console.warn('CORS blocked for origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
   credentials: true, // MUST BE TRUE FOR COOKIES
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'X-Requested-With'],
