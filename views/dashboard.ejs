@@ -20,15 +20,46 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .sidebar { transition: transform 0.3s ease; }
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .sidebar { 
+            transition: transform 0.3s ease;
+            z-index: 40;
+        }
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
+            .sidebar { 
+                transform: translateX(-100%);
+                position: fixed;
+                height: 100vh;
+            }
+            .sidebar.active { 
+                transform: translateX(0);
+            }
+            /* Overlay when sidebar open */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 30;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+        /* Prevent text selection on buttons */
+        button {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div id="sidebar" class="sidebar fixed md:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
@@ -81,7 +112,7 @@
                             <p class="text-xs text-gray-500"><%= user.plan.toUpperCase() %> Plan</p>
                         </div>
                     </div>
-                    <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition">
+                    <button type="button" onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition">
                         <i class="fas fa-sign-out-alt mr-2"></i>
                         Logout
                     </button>
@@ -93,14 +124,17 @@
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
             <header class="bg-white shadow-sm z-10">
-                <div class="px-6 py-4 flex items-center justify-between">
-                    <button onclick="toggleSidebar()" class="md:hidden text-gray-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-                    <a href="https://t.me/yourtelegram" target="_blank" class="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                        <i class="fab fa-telegram-plane mr-2"></i>
-                        Contact Support
+                <div class="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="toggleSidebar()" class="md:hidden text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+                    </div>
+                    <a href="https://t.me/yourtelegram" target="_blank" class="flex items-center px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm sm:text-base">
+                        <i class="fab fa-telegram-plane mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Contact Support</span>
+                        <span class="sm:hidden">Support</span>
                     </a>
                 </div>
             </header>
@@ -110,7 +144,7 @@
                 <!-- Overview Section -->
                 <div id="overview-section" class="content-section">
                     <!-- Stats Cards -->
-                    <div class="grid md:grid-cols-4 gap-6 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-gray-600 text-sm">Total Requests (All Users)</span>
@@ -164,35 +198,37 @@
                     </div>
 
                     <!-- Recent Activity -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr class="border-b">
-                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Endpoint</th>
-                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Method</th>
-                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Time</th>
-                                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                        <div class="overflow-x-auto -mx-4 sm:mx-0">
+                            <div class="inline-block min-w-full align-middle">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="text-left py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Endpoint</th>
+                                        <th class="text-left py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Method</th>
+                                        <th class="text-left py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Time</th>
+                                        <th class="text-left py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="bg-white divide-y divide-gray-200">
                                     <% if (recentLogs.length === 0) { %>
                                     <tr>
-                                        <td colspan="4" class="text-center py-8 text-gray-500">No activity yet</td>
+                                        <td colspan="4" class="text-center py-8 text-sm text-gray-500">No activity yet</td>
                                     </tr>
                                     <% } else { %>
                                         <% recentLogs.forEach(log => { %>
-                                        <tr class="border-b hover:bg-gray-50">
-                                            <td class="py-3 px-4 text-sm font-mono"><%= log.endpoint %></td>
-                                            <td class="py-3 px-4 text-sm"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"><%= log.method %></span></td>
-                                            <td class="py-3 px-4 text-sm text-gray-600"><%= new Date(log.created_at).toLocaleString() %></td>
-                                            <td class="py-3 px-4 text-sm"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Success</span></td>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="py-3 px-3 sm:px-4 text-xs sm:text-sm font-mono text-gray-900 whitespace-nowrap"><%= log.endpoint %></td>
+                                            <td class="py-3 px-3 sm:px-4 text-xs sm:text-sm"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"><%= log.method %></span></td>
+                                            <td class="py-3 px-3 sm:px-4 text-xs sm:text-sm text-gray-600 whitespace-nowrap"><%= new Date(log.created_at).toLocaleString() %></td>
+                                            <td class="py-3 px-3 sm:px-4 text-xs sm:text-sm"><span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Success</span></td>
                                         </tr>
                                         <% }); %>
                                     <% } %>
                                 </tbody>
                             </table>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -372,8 +408,13 @@
         // Toggle Sidebar (Mobile)
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
             if (sidebar) {
                 sidebar.classList.toggle('active');
+            }
+            if (overlay) {
+                overlay.classList.toggle('active');
             }
         }
 
