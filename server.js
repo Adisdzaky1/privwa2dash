@@ -344,7 +344,7 @@ app.post('/auth/register', async (req, res) => {
 
     // Verify reCAPTCHA
     const recaptchaResponse = req.body['g-recaptcha-response'];
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LdPSlEsAAAAAJ8MIoT8bXxa4NZk33rgNZB7zbd4';
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LeKVFcsAAAAAPOiAdmhInWwo_nWMDFK6Nw-Pn_J';
     
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
     const recaptchaResult = await axios.post(verifyUrl);
@@ -420,7 +420,7 @@ app.post('/auth/login', async (req, res) => {
 
     // Verify reCAPTCHA
     const recaptchaResponse = req.body['g-recaptcha-response'];
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LdPSlEsAAAAAJ8MIoT8bXxa4NZk33rgNZB7zbd4';
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LeKVFcsAAAAAPOiAdmhInWwo_nWMDFK6Nw-Pn_J';
     
     const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
     const recaptchaResult = await axios.post(verifyUrl);
