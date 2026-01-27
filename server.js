@@ -77,32 +77,37 @@ app.use(cors({
 app.options('*', cors());
 
 // ==================== SECURITY MIDDLEWARES ====================
+
+// Ganti bagian helmet dengan ini:
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: [
-        "'self'", 
+        "'self'",
         "'unsafe-inline'", 
-        "https://cdn.jsdelivr.net", 
+        "https://cdn.jsdelivr.net",
+        "https://fonts.bunny.net",  // Alternative to Google Fonts
         "https://cdn.tailwindcss.com",
-        "https://cdnjs.cloudflare.com",
-        "https://fonts.googleapis.com"
+        "https://cdnjs.cloudflare.com"
       ],
       scriptSrc: [
-        "'self'", 
-        "'unsafe-inline'", 
-        "https://cdn.jsdelivr.net", 
-        "https://www.google.com", 
-        "https://www.gstatic.com",
+        "'self'",
+        "'unsafe-inline'",
         "https://cdn.tailwindcss.com",
-        "https://cdnjs.cloudflare.com",
-        "https://fonts.googleapis.com"
+        "https://cdn.jsdelivr.net",
+        "https://unpkg.com"
       ],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      frameSrc: ["https://www.google.com"],
-      connectSrc: ["'self'", "https://www.google.com", "https://www.gstatic.com"],
+      fontSrc: [
+        "'self'",
+        "data:",
+        "https://fonts.bunny.net",  // Alternative to Google Fonts
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net"
+      ],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'self'"]
     },
   },
   crossOriginEmbedderPolicy: false,
