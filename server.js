@@ -86,7 +86,8 @@ app.use(helmet({
         "'unsafe-inline'", 
         "https://cdn.jsdelivr.net", 
         "https://fonts.googleapis.com",
-        "https://cdn.tailwindcss.com"
+        "https://cdn.tailwindcss.com",
+        "https://cdnjs.cloudflare.com"
       ],
       scriptSrc: [
         "'self'", 
@@ -94,7 +95,8 @@ app.use(helmet({
         "https://cdn.jsdelivr.net", 
         "https://www.google.com", 
         "https://www.gstatic.com",
-        "https://cdn.tailwindcss.com"
+        "https://cdn.tailwindcss.com",
+        "https://cdnjs.cloudflare.com"
       ],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
