@@ -542,17 +542,36 @@ app.post('/auth/login', async (req, res) => {
 });
 
 // Logout endpoint
+// Logout endpoint
 app.post('/auth/logout', async (req, res) => {
-  try {
-    const token = req.cookies.access_token;
-    if (token) {
-      await supabase.auth.signOut();
+    try {
+        const token = req.cookies.access_token;
+        if (token) {
+            await supabase.auth.signOut();
+        }
+        
+        // Clear all auth cookies
+        res.clearCookie('access_token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            path: '/'
+        });
+        
+        res.clearCookie('sb-access-token', { path: '/' });
+        res.clearCookie('sb-refresh-token', { path: '/' });
+        
+        res.json({ 
+            success: true, 
+            message: 'Logged out successfully' 
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
-    res.clearCookie('access_token');
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 // Dashboard
