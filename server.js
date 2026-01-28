@@ -89,6 +89,7 @@ app.use(helmet({
         "https://cdn.jsdelivr.net",
         "https://fonts.bunny.net",  // Alternative to Google Fonts
         "https://cdn.tailwindcss.com",
+        "https://fonts.cdnfonts.com",
         "https://cdnjs.cloudflare.com"
       ],
       scriptSrc: [
@@ -96,6 +97,7 @@ app.use(helmet({
         "'unsafe-inline'",
         "https://cdn.tailwindcss.com",
         "https://cdn.jsdelivr.net",
+        "https://fonts.cdnfonts.com",
         "https://unpkg.com"
       ],
       fontSrc: [
@@ -103,6 +105,7 @@ app.use(helmet({
         "data:",
         "https://fonts.bunny.net",  // Alternative to Google Fonts
         "https://cdnjs.cloudflare.com",
+        "https://fonts.cdnfonts.com",
         "https://cdn.jsdelivr.net"
       ],
       imgSrc: ["'self'", "data:", "https:", "http:"],
