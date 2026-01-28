@@ -79,6 +79,7 @@ app.options('*', cors());
 // ==================== SECURITY MIDDLEWARES ====================
 
 // Ganti bagian helmet dengan ini:
+/*
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -116,7 +117,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-
+*/
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
