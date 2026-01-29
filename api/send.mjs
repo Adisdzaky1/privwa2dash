@@ -14,7 +14,7 @@ import makeWASocket, {
   BufferJSON,
   initAuthCreds // TAMBAHKAN INI
 } from '@whiskeysockets/baileys';
-import { Redis } from '@upstash/redis';
+
 import QRCode from 'qrcode';
 import pino from 'pino';
 import axios from 'axios';
