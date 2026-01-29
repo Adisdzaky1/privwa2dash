@@ -11,51 +11,27 @@ import makeWASocket, {
   downloadContentFromMessage,
   getContentType,
   DisconnectReason,
-  BufferJSON,
-  initAuthCreds // TAMBAHKAN INI
+  useMultiFileAuthState
 } from '@whiskeysockets/baileys';
+import { Redis } from '@upstash/redis';
 import QRCode from 'qrcode';
 import pino from 'pino';
 import axios from 'axios';
-import { createClient } from '@supabase/supabase-js';
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-// Konfigurasi Supabase
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Konfigurasi Redis Upstash
+const redis = new Redis({
+  url: process.env.REDIS_URL || 'https://your-redis.upstash.io',
+  token: process.env.REDIS_TOKEN || 'your-redis-token',
+});
 
 // Fungsi untuk mendapatkan sesi dari Redis
-// Fungsi untuk mendapatkan sesi dari Supabase
 async function getSession(nomor) {
   try {
-    const { data, error } = await supabase
-      .from('whatsapp_sessions')
-      .select('auth_state, updated_at')
-      .eq('number', nomor)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      console.error(`Error fetching session for ${nomor}:`, error.message);
-      throw new Error(error.message);
-    }
-
-    // Cek apakah session sudah expired (30 hari)
-    if (data && data.auth_state) {
-      const updatedAt = new Date(data.updated_at);
-      const now = new Date();
-      const diffDays = (now - updatedAt) / (1000 * 60 * 60 * 24);
-      
-      if (diffDays > 30) {
-        console.log(`Session for ${nomor} expired, deleting...`);
-        await deleteSession(nomor);
-        return null;
-      }
-
+    const authState = await redis.get(`whatsapp:session:${nomor}`);
+    
+    if (authState) {
       try {
-        return JSON.parse(data.auth_state, BufferJSON.reviver); // Tambahkan reviver
+        return JSON.parse(authState);
       } catch (e) {
         console.error(`Error parsing auth state for ${nomor}:`, e.message);
         return null;
@@ -68,21 +44,16 @@ async function getSession(nomor) {
   }
 }
 
-// Fungsi untuk menyimpan sesi ke Supabase
+// Fungsi untuk menyimpan sesi ke Redis
 async function saveSession(nomor, state) {
   try {
-    const { error } = await supabase
-  .from('whatsapp_sessions')
-  .upsert([{ 
-    number: nomor, 
-    auth_state: JSON.stringify(state, BufferJSON.replacer), // Tambahkan replacer
-    updated_at: new Date().toISOString()
-  }], { onConflict: 'number' });
-
-    if (error) {
-      console.error(`Error saving session for ${nomor}:`, error.message);
-      throw new Error(error.message);
-    }
+    // Simpan dengan TTL 30 hari
+    await redis.set(`whatsapp:session:${nomor}`, JSON.stringify(state), {
+      ex: 2592000,
+    });
+    
+    // Simpan juga ke set untuk tracking semua session
+    await redis.sadd('whatsapp:sessions:list', nomor);
   } catch (err) {
     console.error(`Error in saveSession:`, err.message);
   }
@@ -103,7 +74,7 @@ async function downloadImage(url) {
     throw error;
   }
 }
-/*
+
 async function handleConnect(req, res, nomor) {
   if (!nomor) {
     return res.status(400).json({
@@ -116,17 +87,26 @@ async function handleConnect(req, res, nomor) {
 
   try {
     const savedState = await getSession(nomor);
-    const authState = {
-      creds: savedState?.creds || initAuthCreds(),
-      keys: makeCacheableSignalKeyStore(savedState?.keys || {}, pino({ level: "silent" }))
-    };
+    const authState = savedState || {};
 
     const sock = makeWASocket({
-          logger: pino({ level: "silent" }),
-          printQRInTerminal: false,
-          auth: authState,
-          browser: ["Ubuntu", "Chrome", "20.0.04"], // Gunakan browser yang lebih stabil
-        });
+      logger: pino({ level: "silent" }),
+      printQRInTerminal: false,
+      auth: {
+        creds: authState.creds || {},
+        keys: authState.keys || makeCacheableSignalKeyStore({}),
+      },
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 0,
+      keepAliveIntervalMs: 10000,
+      emitOwnEvents: true,
+      fireInitQueries: true,
+      generateHighQualityLinkPreview: true,
+      syncFullHistory: false, // Ubah ke false
+      markOnlineOnConnect: true,
+      browser: ["iOS", "Safari", "16.5.1"],
+      getMessage: async () => undefined,
+    });
 
     sock.ev.on('connection.update', async (update) => {
       try {
@@ -238,7 +218,7 @@ async function handleConnect(req, res, nomor) {
   }
 }
 
-*/
+// ... (sisanya tetap sama seperti sebelumnya)
 
 // Fungsi untuk handle status koneksi
 async function handleStatus(res, nomor) {
@@ -276,143 +256,212 @@ async function handleStatus(res, nomor) {
 }
 
 // Fungsi utama untuk mengirim pesan
-// ... (Bagian import tetap sama)
-
-// Tambahkan helper untuk memproses data kunci (keys) agar kompatibel dengan Baileys
-const initSignalKeyStore = (keys) => {
-  return {
-    get: (type, ids) => {
-      const classType = type;
-      return ids.reduce((dict, id) => {
-        const value = keys[classType]?.[id];
-        if (value) dict[id] = value;
-        return dict;
-      }, {});
-    },
-    set: (data) => {
-      for (const type in data) {
-        if (!keys[type]) keys[type] = {};
-        Object.assign(keys[type], data[type]);
-      }
-    }
-  };
-};
-
 async function handleSendMessage(res, params) {
-  const { message, nomor, image_url, tujuan } = params;
-
-  if (!tujuan) {
-    return res.status(400).json({ status: 'error', message: 'Nomor tujuan wajib diisi' });
-  }
+  const { message, nomor, image_url } = params;
 
   try {
+    // Ambil sesi dari Redis
     const savedState = await getSession(nomor);
     if (!savedState) {
       return res.status(400).json({
         status: 'error',
-        message: 'Sesi tidak ditemukan. Silakan pairing ulang.',
+        message: 'Nomor ini belum terhubung ke WhatsApp. Silakan lakukan pairing terlebih dahulu.',
       });
     }
 
-    // PERBAIKAN: Inisialisasi keys agar memiliki fungsi .get() dan .set()
-    const myKeys = savedState.keys || {};
-    const authState = {
-      creds: savedState.creds,
-      keys: makeCacheableSignalKeyStore(initSignalKeyStore(myKeys), pino({ level: "silent" }))
-    };
-
     const sock = makeWASocket({
-      logger: pino({ level: "error" }),
-      auth: authState,
-      browser: ["Ubuntu", "Chrome", "20.0.04"],
-      markOnlineOnConnect: false,
+      auth: savedState,
+      browser: ['Ubuntu', 'Chrome', '20.0.04'],
+      logger: pino({ level: 'error' }),
+      connectTimeoutMs: 60000,
     });
 
-    const formattednomor = `${tujuan.replace(/\D/g, '')}@s.whatsapp.net`;
+    // Buat pesan teks
+    const messageText = message;
 
-    // PERBAIKAN: Gunakan Promise agar proses pengiriman ditunggu sampai selesai
+    const formattednomor = `${nomor}@s.whatsapp.net`;
+
     return new Promise((resolve) => {
-      let isDone = false;
-
       sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect } = update;
-
-        if (connection === 'open') {
+        if (update.connection === 'open') {
           try {
-            await sleep(3000); // Jeda agar koneksi stabil
-
-            if (image_url && image_url !== 'false') {
-              const imageBuffer = await downloadImage(image_url);
-              await sock.sendMessage(formattednomor, {
-                image: imageBuffer,
-                caption: message
-              });
+            // Jika ada image_url, kirim gambar dengan caption
+            if (image_url) {
+              console.log('Mengirim gambar dengan caption...');
+              
+              try {
+                // Download gambar dari URL
+                const imageBuffer = await downloadImage(image_url);
+                
+                // Prepare media untuk dikirim
+                const media = {
+                  image: imageBuffer,
+                  mimetype: 'image/jpeg' // Anda bisa deteksi mime type sebenarnya
+                };
+                
+                // Upload media ke WhatsApp
+                const preparedMedia = await prepareWAMessageMedia(
+                  media, 
+                  { upload: sock.authState.creds.mediaUpload }
+                );
+                
+                // Gabungkan caption dengan teks pesan jika ada caption custom
+                const finalCaption = messageText 
+                  ? `${messageText}` 
+                  : messageText;
+                
+                // Kirim gambar dengan caption
+                await sock.sendMessage(formattednomor, {
+                  ...preparedMedia,
+                  caption: finalCaption
+                });
+                
+                console.log('Gambar berhasil dikirim');
+                
+                res.status(200).json({ 
+                  status: 'success', 
+                  message: 'Pesan dan gambar berhasil dikirim' 
+                });
+                
+              } catch (mediaError) {
+                console.error('Error mengirim gambar:', mediaError.message);
+                // Fallback ke pesan teks saja
+                await sock.sendMessage(formattednomor, { text: messageText });
+                res.status(200).json({ 
+                  status: 'success', 
+                  message: 'Pesan teks berhasil dikirim (gambar gagal)' 
+                });
+              }
             } else {
-              await sock.sendMessage(formattednomor, { text: message });
+              // Kirim pesan teks saja
+              await sock.sendMessage(formattednomor, { text: messageText });
+              console.log('Pesan teks berhasil dikirim');
+              res.status(200).json({ 
+                status: 'success', 
+                message: 'Pesan berhasil dikirim' 
+              });
             }
-
-            if (!res.headersSent) {
-              res.status(200).json({ status: 'success', message: 'Pesan terkirim' });
-            }
-            isDone = true;
-            sock.ws.close();
-            resolve();
-          } catch (err) {
-            console.error('Kirim Gagal:', err.message);
-            if (!res.headersSent) res.status(500).json({ status: 'error', message: err.message });
+            
+            // Simpan kredensial terbaru
+            sock.ev.on('creds.update', async (newState) => {
+              await saveSession(nomor, newState);
+            });
+            
+            // Tunggu sebentar sebelum menutup koneksi
+            setTimeout(() => {
+              sock.ws.close();
+              resolve();
+            }, 5000);
+            
+          } catch (sendError) {
+            console.error('Error mengirim pesan:', sendError.message);
+            res.status(500).json({ 
+              status: 'error', 
+              message: sendError.message 
+            });
             sock.ws.close();
             resolve();
           }
         }
 
-        if (connection === 'close') {
-          const reason = lastDisconnect?.error?.output?.statusCode;
-          if (reason === DisconnectReason.loggedOut) {
-            await supabase.from('whatsapp_sessions').delete().eq('number', nomor);
+        if (update.connection === 'close') {
+          console.log('Koneksi terputus:', update.lastDisconnect?.error);
+          const reason = update.lastDisconnect?.error?.output?.statusCode || 'Unknown Reason';
+          
+          if (reason !== DisconnectReason.loggedOut) {
+            console.log('Mencoba menyambung ulang...');
+            // Tidak perlu reconnect karena ini one-time send
+          } else {
+            console.log('User logged out, clearing session');
+            await redis.del(`whatsapp:session:${nomor}`);
+            await redis.srem('whatsapp:sessions:list', nomor);
           }
+          
+          res.status(500).json({ 
+            status: 'error', 
+            message: 'Koneksi WhatsApp terputus' 
+          });
           resolve();
         }
       });
 
-      sock.ev.on('creds.update', async () => {
-        // PERBAIKAN: Simpan kembali ke DB setiap kali ada update keys
-        await saveSession(nomor, {
-          creds: sock.authState.creds,
-          keys: myKeys // myKeys sudah terupdate otomatis via referensi di initSignalKeyStore
-        });
-      });
-
-      // Timeout 25 detik
+      // Handle error koneksi timeout
       setTimeout(() => {
-        if (!isDone && !res.headersSent) {
-          res.status(408).json({ status: 'error', message: 'Request Timeout' });
+        if (!res.headersSent) {
+          res.status(408).json({ 
+            status: 'error', 
+            message: 'Koneksi timeout' 
+          });
           sock.ws.close();
           resolve();
         }
-      }, 25000);
+      }, 30000);
     });
 
   } catch (error) {
-    if (!res.headersSent) res.status(500).json({ status: 'error', message: error.message });
+    console.error('Error:', error.message);
+    return res.status(500).json({ 
+      status: 'error', 
+      message: error.message 
+    });
+  }
+}
+
+// Fungsi tambahan untuk mendapatkan semua sesi aktif
+async function getAllSessions() {
+  try {
+    const sessions = await redis.smembers('whatsapp:sessions:list');
+    return sessions;
+  } catch (err) {
+    console.error(`Error in getAllSessions:`, err.message);
+    return [];
   }
 }
 
 export default async (req, res) => {
   try {
-    const { nomor, image_url, message, tujuan, action = 'send' } = req.query;
+    const { 
+      product, 
+      id, 
+      nominal, 
+      tujuan, 
+      tanggal, 
+      nomor,
+      image_url, // URL gambar yang akan dikirim
+      caption,   // Caption untuk gambar
+      action = 'send' // send, connect, status
+    } = req.query;
 
+    // Handle different actions
     switch (action) {
+      case 'connect':
+        return handleConnect(req, res, nomor);
       case 'status':
         return handleStatus(res, nomor);
       case 'send':
-        if (!nomor || !tujuan) {
-          return res.status(400).json({ status: 'error', message: 'Nomor pengirim dan tujuan wajib ada' });
+        // Validasi parameter untuk pengiriman pesan
+        if (!nomor) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Parameter "nomor" diperlukan',
+          });
         }
-        return handleSendMessage(res, { message, nomor, image_url, tujuan });
+        return handleSendMessage(res, { 
+          message: caption || 'Pesan dari API', 
+          nomor, 
+          image_url 
+        });
       default:
-        return res.status(400).json({ status: 'error', message: 'Action tidak valid' });
+        return res.status(400).json({
+          status: 'error',
+          message: 'Action tidak valid. Gunakan: send, connect, atau status'
+        });
     }
   } catch (error) {
-    return res.status(500).json({ status: 'error', message: error.message });
+    console.error('Error:', error.message);
+    return res.status(500).json({ 
+      status: 'error', 
+      message: error.message 
+    });
   }
 };
